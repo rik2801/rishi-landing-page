@@ -49,8 +49,10 @@ function ExtLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
 export default function Home() {
   return (
     <div className="site-container">
-      <nav className="flex justify-center pt-6">
-        <PaletteSwitcher />
+      <nav className="palette-nav" aria-label="Theme colors">
+        <div className="palette-glass-dock">
+          <PaletteSwitcher />
+        </div>
       </nav>
 
       {/* Name block — right-aligned, matching Sean's .blockright */}

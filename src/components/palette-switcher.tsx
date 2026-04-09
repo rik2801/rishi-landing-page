@@ -77,6 +77,10 @@ export const PALETTES = [
   },
 ] as const;
 
+const STORAGE_PALETTE = "palette";
+const STORAGE_CUSTOM = "paletteCustom";
+export const CUSTOM_PALETTE_ID = "custom" as const;
+
 function applyColors(bg: string, fg: string) {
   const s = document.documentElement.style;
   s.setProperty("--bg", bg);
@@ -112,19 +116,44 @@ function editableSwatchRingColor(backgroundHex: string): "#000000" | "#ffffff" {
   return lum < 0.4 ? "#ffffff" : "#000000";
 }
 
+type PickerSession = { bg: string; fg: string; activeId: string };
+
 export function PaletteSwitcher() {
   const [active, setActive] = useState("default");
   const [liveBg, setLiveBg] = useState("#ffffff");
   const [liveFg, setLiveFg] = useState("#000000");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerSession, setPickerSession] = useState<PickerSession | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("palette") || "default";
-    setActive(saved);
-    const p = PALETTES.find((pl) => pl.id === saved) ?? PALETTES[0];
+    let resolved = localStorage.getItem(STORAGE_PALETTE) || "default";
+    if (resolved === CUSTOM_PALETTE_ID) {
+      try {
+        const raw = localStorage.getItem(STORAGE_CUSTOM);
+        if (raw) {
+          const c = JSON.parse(raw) as { bg?: string; fg?: string };
+          if (c.bg && c.fg) {
+            setActive(CUSTOM_PALETTE_ID);
+            setLiveBg(c.bg);
+            setLiveFg(c.fg);
+            applyColors(c.bg, c.fg);
+            setMounted(true);
+            return;
+          }
+        }
+      } catch {
+        /* invalid stored custom */
+      }
+      localStorage.removeItem(STORAGE_CUSTOM);
+      localStorage.setItem(STORAGE_PALETTE, "default");
+      resolved = "default";
+    }
+    setActive(resolved);
+    const p = PALETTES.find((pl) => pl.id === resolved) ?? PALETTES[0];
     setLiveBg(p.bg);
     setLiveFg(p.fg);
+    applyPalette(resolved);
     setMounted(true);
   }, []);
 
@@ -135,21 +164,65 @@ export function PaletteSwitcher() {
   function select(id: string) {
     setActive(id);
     setPickerOpen(false);
+    setPickerSession(null);
     applyPalette(id);
-    localStorage.setItem("palette", id);
+    localStorage.setItem(STORAGE_PALETTE, id);
+    localStorage.removeItem(STORAGE_CUSTOM);
     const p = PALETTES.find((pl) => pl.id === id) ?? PALETTES[0];
     setLiveBg(p.bg);
     setLiveFg(p.fg);
   }
 
+  function togglePicker() {
+    if (pickerOpen) {
+      setPickerOpen(false);
+      setPickerSession(null);
+      return;
+    }
+    setPickerSession({ bg: liveBg, fg: liveFg, activeId: active });
+    setPickerOpen(true);
+  }
+
+  function saveCustom() {
+    const payload = JSON.stringify({ bg: liveBg, fg: liveFg });
+    localStorage.setItem(STORAGE_PALETTE, CUSTOM_PALETTE_ID);
+    localStorage.setItem(STORAGE_CUSTOM, payload);
+    applyColors(liveBg, liveFg);
+    setActive(CUSTOM_PALETTE_ID);
+    setPickerOpen(false);
+    setPickerSession(null);
+  }
+
+  function cancelEdit() {
+    if (pickerSession) {
+      const { bg, fg, activeId } = pickerSession;
+      setLiveBg(bg);
+      setLiveFg(fg);
+      if (activeId === CUSTOM_PALETTE_ID) {
+        applyColors(bg, fg);
+      } else {
+        applyPalette(activeId);
+      }
+      setActive(activeId);
+    }
+    setPickerOpen(false);
+    setPickerSession(null);
+  }
+
   function onBgChange(val: string) {
     setLiveBg(val);
-    applyColors(val, liveFg);
+    setLiveFg((fg) => {
+      applyColors(val, fg);
+      return fg;
+    });
   }
 
   function onFgChange(val: string) {
     setLiveFg(val);
-    applyColors(liveBg, val);
+    setLiveBg((bg) => {
+      applyColors(bg, val);
+      return bg;
+    });
   }
 
   const editRing = editableSwatchRingColor(liveBg);
@@ -174,17 +247,21 @@ export function PaletteSwitcher() {
         ))}
 
         <button
-          onClick={() => setPickerOpen(!pickerOpen)}
+          onClick={togglePicker}
           aria-label="Toggle color picker"
           className="palette-swatch"
           style={{
             background: "none",
             border: "1.5px dashed var(--fg)",
-            opacity: pickerOpen ? 1 : 0.4,
+            opacity: pickerOpen || active === CUSTOM_PALETTE_ID ? 1 : 0.4,
             fontSize: 12,
             lineHeight: "18px",
             textAlign: "center",
             color: "var(--fg)",
+            boxShadow:
+              active === CUSTOM_PALETTE_ID && !pickerOpen
+                ? "inset 0 0 0 1px rgba(128,128,128,0.2), 0 0 0 2px var(--bg), 0 0 0 3.5px var(--fg)"
+                : undefined,
           }}
         >
           ✎
@@ -215,6 +292,35 @@ export function PaletteSwitcher() {
             <span className="color-picker-hex">{liveFg.toUpperCase()}</span>
             <span className="color-picker-tag">FG</span>
           </label>
+          <div className="color-picker-actions">
+            <button
+              type="button"
+              className="color-picker-action-btn"
+              onClick={saveCustom}
+              aria-label="Save custom colors"
+              title="Save"
+            >
+              ✓
+            </button>
+            <button
+              type="button"
+              className="color-picker-action-btn"
+              onClick={cancelEdit}
+              aria-label="Cancel editing"
+              title="Cancel — undo changes this session"
+            >
+              ✕
+            </button>
+            <button
+              type="button"
+              className="color-picker-action-btn"
+              onClick={() => select("default")}
+              aria-label="Reset to site default colors"
+              title="Reset to default (white & black) — clears saved custom palette"
+            >
+              ↺
+            </button>
+          </div>
         </div>
       )}
     </div>
