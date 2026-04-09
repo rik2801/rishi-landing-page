@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #fafaf9;
+  --fg: #1c1c1c;
+  --fg-muted: #6b6b6b;
+  --border-color: #e5e5e3;
+  --link-line: rgba(28, 28, 28, 0.2);
+  --link-line-hover: rgba(28, 28, 28, 0.5);
+}
+
+.dark {
+  --bg: #111111;
+  --fg: #e8e8e6;
+  --fg-muted: #8a8a8a;
+  --border-color: #2a2a2a;
+  --link-line: rgba(232, 232, 230, 0.2);
+  --link-line-hover: rgba(232, 232, 230, 0.5);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-surface: var(--bg);
+  --color-ink: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-rule: var(--border-color);
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+::selection {
+  background-color: var(--fg);
+  color: var(--bg);
+}
+
+.link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--link-line);
+  transition: text-decoration-color 0.2s ease;
+}
+
+.link:hover {
+  text-decoration-color: var(--link-line-hover);
 }
