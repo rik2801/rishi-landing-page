@@ -95,6 +95,41 @@ body {
   align-items: center;
 }
 
+/* Smooth expand/collapse — grid 0fr→1fr; max-width 0 when closed so hidden row
+   doesn’t widen the dock (intrinsic min-content still includes off-screen picker UI). */
+.color-picker-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  min-width: 0;
+  max-width: 0;
+  overflow: hidden;
+  transition:
+    grid-template-rows 0.56s cubic-bezier(0.17, 0.88, 0.32, 1),
+    margin-top 0.56s cubic-bezier(0.17, 0.88, 0.32, 1),
+    max-width 0.56s cubic-bezier(0.17, 0.88, 0.32, 1);
+}
+
+.color-picker-expand--open {
+  grid-template-rows: 1fr;
+  margin-top: 10px;
+  max-width: min(1200px, calc(100vw - 48px));
+}
+
+.color-picker-expand-inner {
+  min-height: 0;
+  overflow: hidden;
+  /* Keep edit ring + native color swatch inside clip (overflow:hidden would cut them otherwise) */
+  padding-inline: 6px;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .color-picker-expand {
+    transition: none;
+  }
+}
+
 .palette-switcher-placeholder {
   height: 20px;
   width: 244px;
@@ -146,6 +181,7 @@ body {
   background: none;
   -webkit-appearance: none;
   appearance: none;
+  flex-shrink: 0;
 }
 
 .color-picker-input::-webkit-color-swatch-wrapper {
@@ -238,6 +274,13 @@ body {
   border-bottom-color: transparent;
 }
 
+/* Inline link inside large body copy: slightly smaller type + em underline so the line reads even */
+.main-text .main-text-inline-link {
+  font-size: 0.88em;
+  vertical-align: 0.03em;
+  border-bottom-width: 0.075em;
+}
+
 /* ————————————————————————————————
    Layout — pixel-matched to seanwhipps.com
    Color transitions on elements that set
@@ -251,11 +294,11 @@ body {
 
 .name-block {
   float: right;
-  font-size: 35px;
+  font-size: 36px;
   color: var(--fg);
   width: 360px;
   display: block;
-  padding-top: 242px;
+  padding-top: 120px;
   padding-bottom: 52px;
   line-height: 18.25px;
   text-align: left;
@@ -274,7 +317,7 @@ body {
   display: inline-block;
   margin-top: 8px;
   height: 35px;
-  font-size: 35px;
+  font-size: 36px;
   line-height: 1.35;
 }
 

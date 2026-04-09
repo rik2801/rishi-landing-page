@@ -228,7 +228,7 @@ export function PaletteSwitcher() {
   const editRing = editableSwatchRingColor(liveBg);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div className="palette-switcher">
         {PALETTES.map((p) => (
           <button
@@ -268,61 +268,67 @@ export function PaletteSwitcher() {
         </button>
       </div>
 
-      {pickerOpen && (
-        <div className="color-picker-row">
-          <label className="color-picker-label">
-            <input
-              type="color"
-              value={liveBg}
-              onChange={(e) => onBgChange(e.target.value)}
-              className="color-picker-input color-picker-input--edit"
-              style={{ boxShadow: `0 0 0 2px ${editRing}` }}
-            />
-            <span className="color-picker-hex">{liveBg.toUpperCase()}</span>
-            <span className="color-picker-tag">BG</span>
-          </label>
-          <label className="color-picker-label">
-            <input
-              type="color"
-              value={liveFg}
-              onChange={(e) => onFgChange(e.target.value)}
-              className="color-picker-input color-picker-input--edit"
-              style={{ boxShadow: `0 0 0 2px ${editRing}` }}
-            />
-            <span className="color-picker-hex">{liveFg.toUpperCase()}</span>
-            <span className="color-picker-tag">FG</span>
-          </label>
-          <div className="color-picker-actions">
-            <button
-              type="button"
-              className="color-picker-action-btn"
-              onClick={saveCustom}
-              aria-label="Save custom colors"
-              title="Save"
-            >
-              ✓
-            </button>
-            <button
-              type="button"
-              className="color-picker-action-btn"
-              onClick={cancelEdit}
-              aria-label="Cancel editing"
-              title="Cancel — undo changes this session"
-            >
-              ✕
-            </button>
-            <button
-              type="button"
-              className="color-picker-action-btn"
-              onClick={() => select("default")}
-              aria-label="Reset to site default colors"
-              title="Reset to default (white & black) — clears saved custom palette"
-            >
-              ↺
-            </button>
+      <div
+        className={`color-picker-expand${pickerOpen ? " color-picker-expand--open" : ""}`}
+        aria-hidden={!pickerOpen}
+        {...(!pickerOpen ? { inert: true as const } : {})}
+      >
+        <div className="color-picker-expand-inner">
+          <div className="color-picker-row">
+            <label className="color-picker-label">
+              <input
+                type="color"
+                value={liveBg}
+                onChange={(e) => onBgChange(e.target.value)}
+                className="color-picker-input color-picker-input--edit"
+                style={{ boxShadow: `0 0 0 2px ${editRing}` }}
+              />
+              <span className="color-picker-hex">{liveBg.toUpperCase()}</span>
+              <span className="color-picker-tag">BG</span>
+            </label>
+            <label className="color-picker-label">
+              <input
+                type="color"
+                value={liveFg}
+                onChange={(e) => onFgChange(e.target.value)}
+                className="color-picker-input color-picker-input--edit"
+                style={{ boxShadow: `0 0 0 2px ${editRing}` }}
+              />
+              <span className="color-picker-hex">{liveFg.toUpperCase()}</span>
+              <span className="color-picker-tag">FG</span>
+            </label>
+            <div className="color-picker-actions">
+              <button
+                type="button"
+                className="color-picker-action-btn"
+                onClick={saveCustom}
+                aria-label="Save custom colors"
+                title="Save"
+              >
+                ✓
+              </button>
+              <button
+                type="button"
+                className="color-picker-action-btn"
+                onClick={cancelEdit}
+                aria-label="Cancel editing"
+                title="Cancel — undo changes this session"
+              >
+                ✕
+              </button>
+              <button
+                type="button"
+                className="color-picker-action-btn"
+                onClick={() => select("default")}
+                aria-label="Reset to site default colors"
+                title="Reset to default (white & black) — clears saved custom palette"
+              >
+                ↺
+              </button>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

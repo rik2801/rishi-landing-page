@@ -35,13 +35,14 @@ const SITE = {
 };
 
 function ExtLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-  const href = props.href ?? "";
+  const { className, ...rest } = props;
+  const href = rest.href ?? "";
   const isExternal = href.startsWith("http") || href.startsWith("mailto:");
   return (
     <a
-      {...props}
+      {...rest}
       {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className="link"
+      className={className ? `link ${className}` : "link"}
     />
   );
 }
@@ -68,7 +69,17 @@ export default function Home() {
       <main className="main-text">
         {SITE.bio.map((p, i) => (
           <span key={i}>
-            {p}
+            {i === 1
+              ? p.split(/(Duorin)/).map((part, j) =>
+                  part === "Duorin" ? (
+                    <ExtLink key={j} href={SITE.links.beta} className="main-text-inline-link">
+                      Duorin
+                    </ExtLink>
+                  ) : (
+                    part
+                  ),
+                )
+              : p}
             {i < SITE.bio.length - 1 && (
               <>
                 <br />
