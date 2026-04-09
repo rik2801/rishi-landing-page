@@ -3,21 +3,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #fafaf9;
-  --fg: #1c1c1c;
+  --bg: #ffffff;
+  --fg: #000000;
   --fg-muted: #6b6b6b;
-  --border-color: #e5e5e3;
-  --link-line: rgba(28, 28, 28, 0.2);
-  --link-line-hover: rgba(28, 28, 28, 0.5);
-}
-
-.dark {
-  --bg: #111111;
-  --fg: #e8e8e6;
-  --fg-muted: #8a8a8a;
-  --border-color: #2a2a2a;
-  --link-line: rgba(232, 232, 230, 0.2);
-  --link-line-hover: rgba(232, 232, 230, 0.5);
+  --border-color: #e0e0e0;
 }
 
 @theme inline {
@@ -25,28 +14,366 @@
   --color-ink: var(--fg);
   --color-muted: var(--fg-muted);
   --color-rule: var(--border-color);
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-apercu), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-apercu-mono), "Courier New", monospace;
 }
 
 body {
   background-color: var(--bg);
   color: var(--fg);
+  margin: 0;
+  font-weight: 400;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 ::selection {
-  background-color: var(--fg);
+  background: var(--fg);
   color: var(--bg);
 }
 
+/* ————————————————————————————————
+   Palette switcher
+   ———————————————————————————————— */
+
+.palette-switcher {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.palette-switcher-placeholder {
+  height: 20px;
+  width: 244px;
+}
+
+.palette-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.palette-swatch:hover {
+  transform: scale(1.12);
+}
+
+.color-picker-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg);
+  transition: color 0.35s ease;
+}
+
+.color-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.color-picker-input {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 9999px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.color-picker-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker-input::-webkit-color-swatch {
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 9999px;
+}
+
+.color-picker-input::-moz-color-swatch {
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 9999px;
+}
+
+/* Edit mode: ring is inline box-shadow; remove inner hairline so the ring stays crisp */
+.color-picker-input--edit::-webkit-color-swatch {
+  border: none;
+}
+
+.color-picker-input--edit::-moz-color-swatch {
+  border: none;
+}
+
+.color-picker-hex {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+
+.color-picker-tag {
+  text-transform: uppercase;
+  opacity: 0.4;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+/* ————————————————————————————————
+   Link style — 4px solid bottom border
+   ———————————————————————————————— */
+
 .link {
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--link-line);
-  transition: text-decoration-color 0.2s ease;
+  text-decoration: none;
+  color: var(--fg);
+  border-bottom: 4px solid var(--fg);
+  transition: color 0.35s ease, border-color 0.2s ease;
 }
 
 .link:hover {
-  text-decoration-color: var(--link-line-hover);
+  border-bottom-color: transparent;
+}
+
+/* ————————————————————————————————
+   Layout — pixel-matched to seanwhipps.com
+   Color transitions on elements that set
+   color explicitly via CSS variables
+   ———————————————————————————————— */
+
+.site-container {
+  width: 1040px;
+  margin: auto;
+}
+
+.name-block {
+  float: right;
+  font-size: 35px;
+  color: var(--fg);
+  width: 360px;
+  display: block;
+  padding-top: 242px;
+  padding-bottom: 52px;
+  line-height: 18.25px;
+  text-align: left;
+  font-weight: 400;
+  transition: color 0.35s ease;
+}
+
+.name-block-name,
+.name-block-descriptor {
+  color: var(--fg);
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+.name-block-descriptor {
+  display: inline-block;
+  margin-top: 8px;
+  height: 35px;
+  font-size: 35px;
+  line-height: 1.35;
+}
+
+.block-clear {
+  clear: both;
+  height: 120px;
+  width: 100%;
+}
+
+.main-text {
+  font-size: 50px;
+  color: var(--fg);
+  line-height: 1.15;
+  font-weight: 400;
+  transition: color 0.35s ease;
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+  text-transform: uppercase;
+  transition: color 0.35s ease;
+}
+
+.footer-band {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 0 40px;
+  align-items: start;
+  margin-top: 160px;
+  padding-bottom: 80px;
+}
+
+.mini-left {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.footer-links-row {
+  display: flex;
+  gap: 40px;
+}
+
+.footer-contact,
+.footer-social {
+  font-size: 50px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.footer-contact .mono-label,
+.footer-social .mono-label,
+.footer-building .mono-label {
+  margin-bottom: 12px;
+}
+
+.footer-building {
+  font-size: 50px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.footer-contact .link,
+.footer-social .link,
+.footer-building .link {
+  font-weight: 400;
+}
+
+.mini-right {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 24px 32px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+  line-height: 1.6;
+  transition: color 0.35s ease;
+  padding-top: 2px;
+}
+
+.mini-right-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+.meta-heading {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+
+.meta-item {
+  display: block;
+}
+
+.meta-link {
+  display: block;
+  color: var(--fg);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.meta-link:hover {
+  opacity: 0.55;
+}
+
+.mono-clear {
+  clear: both;
+  height: 90px;
+}
+
+/* ————————————————————————————————
+   Responsive — small phones only
+   ———————————————————————————————— */
+
+@media only screen and (max-width: 520px) {
+  .site-container {
+    width: 94%;
+  }
+
+  .name-block {
+    font-size: 19px;
+    width: 260px;
+    padding-top: 110px;
+  }
+
+  .name-block-descriptor {
+    margin-top: 6px;
+    font-size: 25px;
+  }
+
+  .block-clear {
+    height: 100px;
+  }
+
+  .main-text {
+    font-size: 32px;
+  }
+
+  .footer-band {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 100px;
+    padding-bottom: 60px;
+  }
+
+  .mini-left {
+    gap: 48px;
+  }
+
+  .footer-links-row {
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .footer-contact,
+  .footer-social,
+  .footer-building {
+    font-size: 32px;
+    line-height: 1.15;
+  }
+
+  .mini-right {
+    font-size: 14px;
+    margin-top: 60px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 16px;
+  }
+
+  .mini-right-col {
+    white-space: normal;
+  }
+
+  .mono-label {
+    font-size: 12px;
+  }
+
+  .palette-swatch {
+    width: 18px;
+    height: 18px;
+  }
+
+  .palette-switcher {
+    gap: 6px;
+  }
+
+  .palette-switcher-placeholder {
+    height: 16px;
+    width: 126px;
+  }
 }

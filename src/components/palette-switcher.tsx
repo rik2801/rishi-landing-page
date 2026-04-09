@@ -1,0 +1,222 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+export const PALETTES = [
+  {
+    id: "default",
+    bg: "#ffffff",
+    fg: "#000000",
+    muted: "#6b6b6b",
+    border: "#e0e0e0",
+    swatch: ["#ffffff", "#000000"],
+  },
+  {
+    id: "midnight",
+    bg: "#111111",
+    fg: "#e8e8e6",
+    muted: "#8a8a8a",
+    border: "#2a2a2a",
+    swatch: ["#111111", "#e8e8e6"],
+  },
+  {
+    id: "vermillion",
+    bg: "#a01010",
+    fg: "#f0e8e0",
+    muted: "#d09088",
+    border: "#881010",
+    swatch: ["#a01010", "#f0e8e0"],
+  },
+  {
+    id: "amber",
+    bg: "#f2a200",
+    fg: "#6a0d69",
+    muted: "#8a5800",
+    border: "#d89000",
+    swatch: ["#f2a200", "#6a0d69"],
+  },
+  {
+    id: "marine",
+    bg: "#1843b4",
+    fg: "#fc6e0e",
+    muted: "#7090c8",
+    border: "#143898",
+    swatch: ["#1843b4", "#fc6e0e"],
+  },
+  {
+    id: "violet",
+    bg: "#9d19b3",
+    fg: "#8aff44",
+    muted: "#c890d8",
+    border: "#881098",
+    swatch: ["#9d19b3", "#8aff44"],
+  },
+  {
+    id: "jade",
+    bg: "#21a87f",
+    fg: "#fefd75",
+    muted: "#78c8a8",
+    border: "#1a9070",
+    swatch: ["#21a87f", "#fefd75"],
+  },
+  {
+    id: "sol",
+    bg: "#E8E83A",
+    fg: "#1843b3",
+    muted: "#989810",
+    border: "#d8d810",
+    swatch: ["#E8E83A", "#1843b3"],
+  },
+  {
+    id: "azure",
+    bg: "#1077f8",
+    fg: "#effb72",
+    muted: "#78b0f0",
+    border: "#0c60d0",
+    swatch: ["#1077f8", "#effb72"],
+  },
+] as const;
+
+function applyColors(bg: string, fg: string) {
+  const s = document.documentElement.style;
+  s.setProperty("--bg", bg);
+  s.setProperty("--fg", fg);
+  s.setProperty("--fg-muted", fg + "80");
+  s.setProperty("--border-color", fg + "20");
+}
+
+function applyPalette(id: string) {
+  const palette = PALETTES.find((p) => p.id === id) ?? PALETTES[0];
+  const s = document.documentElement.style;
+  s.setProperty("--bg", palette.bg);
+  s.setProperty("--fg", palette.fg);
+  s.setProperty("--fg-muted", palette.muted);
+  s.setProperty("--border-color", palette.border);
+}
+
+/** Ring around editable swatches: black on light BG, white on dark BG (e.g. black). */
+function editableSwatchRingColor(backgroundHex: string): "#000000" | "#ffffff" {
+  const hex = backgroundHex.replace(/^#/, "");
+  const expanded =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex;
+  if (expanded.length !== 6) return "#000000";
+  const r = parseInt(expanded.slice(0, 2), 16);
+  const g = parseInt(expanded.slice(2, 4), 16);
+  const b = parseInt(expanded.slice(4, 6), 16);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum < 0.4 ? "#ffffff" : "#000000";
+}
+
+export function PaletteSwitcher() {
+  const [active, setActive] = useState("default");
+  const [liveBg, setLiveBg] = useState("#ffffff");
+  const [liveFg, setLiveFg] = useState("#000000");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("palette") || "default";
+    setActive(saved);
+    const p = PALETTES.find((pl) => pl.id === saved) ?? PALETTES[0];
+    setLiveBg(p.bg);
+    setLiveFg(p.fg);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className="palette-switcher-placeholder" />;
+  }
+
+  function select(id: string) {
+    setActive(id);
+    setPickerOpen(false);
+    applyPalette(id);
+    localStorage.setItem("palette", id);
+    const p = PALETTES.find((pl) => pl.id === id) ?? PALETTES[0];
+    setLiveBg(p.bg);
+    setLiveFg(p.fg);
+  }
+
+  function onBgChange(val: string) {
+    setLiveBg(val);
+    applyColors(val, liveFg);
+  }
+
+  function onFgChange(val: string) {
+    setLiveFg(val);
+    applyColors(liveBg, val);
+  }
+
+  const editRing = editableSwatchRingColor(liveBg);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div className="palette-switcher">
+        {PALETTES.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => select(p.id)}
+            aria-label={`${p.id} palette`}
+            className="palette-swatch"
+            style={{
+              background: `linear-gradient(135deg, ${p.swatch[0]} 0%, ${p.swatch[1]} 100%)`,
+              boxShadow:
+                active === p.id
+                  ? "inset 0 0 0 1px rgba(128,128,128,0.2), 0 0 0 2px var(--bg), 0 0 0 3.5px var(--fg)"
+                  : "inset 0 0 0 1px rgba(128,128,128,0.2)",
+            }}
+          />
+        ))}
+
+        <button
+          onClick={() => setPickerOpen(!pickerOpen)}
+          aria-label="Toggle color picker"
+          className="palette-swatch"
+          style={{
+            background: "none",
+            border: "1.5px dashed var(--fg)",
+            opacity: pickerOpen ? 1 : 0.4,
+            fontSize: 12,
+            lineHeight: "18px",
+            textAlign: "center",
+            color: "var(--fg)",
+          }}
+        >
+          ✎
+        </button>
+      </div>
+
+      {pickerOpen && (
+        <div className="color-picker-row">
+          <label className="color-picker-label">
+            <input
+              type="color"
+              value={liveBg}
+              onChange={(e) => onBgChange(e.target.value)}
+              className="color-picker-input color-picker-input--edit"
+              style={{ boxShadow: `0 0 0 2px ${editRing}` }}
+            />
+            <span className="color-picker-hex">{liveBg.toUpperCase()}</span>
+            <span className="color-picker-tag">BG</span>
+          </label>
+          <label className="color-picker-label">
+            <input
+              type="color"
+              value={liveFg}
+              onChange={(e) => onFgChange(e.target.value)}
+              className="color-picker-input color-picker-input--edit"
+              style={{ boxShadow: `0 0 0 2px ${editRing}` }}
+            />
+            <span className="color-picker-hex">{liveFg.toUpperCase()}</span>
+            <span className="color-picker-tag">FG</span>
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}

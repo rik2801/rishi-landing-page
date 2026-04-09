@@ -1,33 +1,38 @@
-import { ThemeToggle } from "@/components/theme-toggle";
-
-/* ——————————————————————————————————————————————
-   SITE CONTENT — edit names, links, and copy here.
-   —————————————————————————————————————————————— */
+import { PaletteSwitcher } from "@/components/palette-switcher";
 
 const SITE = {
   name: "Rishi Kiran",
-  descriptor: "Design, product, AI, interaction.",
+  descriptor: "Product x Design x AI.",
   bio: [
-    "Rishi Kiran is a product designer and builder focused on turning complex systems into usable decisions.",
-    "He is currently building Duorin, an AI stylist now in beta, where calendar context, weather, wardrobe signals, and interaction design come together to make everyday dressing feel intelligent and effortless.",
-    "Previously, he worked across UX design, research, and software engineering, designing systems and interfaces shaped by both user behavior and implementation reality.",
-    "He is especially interested in AI products, decision-making interfaces, visual systems, and tools that feel alive.",
+    "Rishi Kiran is a product builder focused on turning complex systems into usable decisions.",
+    "He is currently building Duorin, an AI stylist now in beta, where calendar context, weather, and wardrobe signals come together to make everyday dressing feel intelligent and effortless.",
+    "Previously, he worked across product design and software engineering, building systems informed by user behavior and real-world constraints.",
+    "He is especially interested in AI products, decision-making systems, visual interfaces, and tools that feel alive.",
   ],
   links: {
-    email: "mailto:your@email.com",       // ← replace with your email
-    linkedin: "https://linkedin.com/in/", // ← replace with your LinkedIn URL
-    github: "https://github.com/",        // ← replace with your GitHub URL
-    beta: "https://duorin.com",           // ← replace with your beta URL
+    email: "mailto:rishikiranm1@gmail.com",
+    linkedin: "https://linkedin.com/in/rishikiran28",
+    github: "https://github.com/rik2801",
+    gitlab: "https://gitlab.com/rishikiran.rik28",
+    beta: "https://duorin.com",
   },
   work: [
-    { title: "Duorin", href: "#" },        // ← add project URL
-    { title: "Treevah", href: "#" },       // ← add project URL
-    { title: "Snack\u2019nU", href: "#" }, // ← add project URL
+    { title: "Duorin", href: "https://duorin.com" },
+    { title: "Treevah", href: "https://www.treevah.com/" },
+    { title: "Snack\u2019nU", href: null },
   ],
-  colophon: ["Built by Rishi Kiran", "Next.js", "Tailwind CSS"],
+  building: [
+    { title: "Duorin (Beta)", href: "https://duorin.com" },
+    { title: "AI decision interfaces", href: null },
+    { title: "Personal tooling experiments", href: null },
+  ],
+  thinking: [
+    "AI products",
+    "Decision-making systems",
+    "Interfaces that feel alive",
+  ],
+  colophon: ["Built by Rishi Kiran"],
 };
-
-/* ——————————————————————————————————————————————— */
 
 function ExtLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const href = props.href ?? "";
@@ -41,84 +46,115 @@ function ExtLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   );
 }
 
-function FooterBlock({
-  heading,
-  children,
-}: {
-  heading: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <h2 className="text-xs uppercase tracking-[0.1em] text-muted mb-3">
-        {heading}
-      </h2>
-      <div className="text-sm leading-relaxed space-y-1">{children}</div>
-    </div>
-  );
-}
-
 export default function Home() {
   return (
-    <div className="mx-auto max-w-[640px] px-6 sm:px-8">
-      <nav className="flex justify-end pt-6 pb-16 md:pt-10 md:pb-24">
-        <ThemeToggle />
+    <div className="site-container">
+      <nav className="flex justify-center pt-6">
+        <PaletteSwitcher />
       </nav>
 
-      <main>
-        <header>
-          <h1 className="font-serif text-[2.5rem] md:text-[3.25rem] leading-[1.08] tracking-[-0.02em]">
-            {SITE.name}
-          </h1>
-          <p className="mt-3 text-base md:text-lg text-muted tracking-[0.005em]">
-            {SITE.descriptor}
-          </p>
-        </header>
+      {/* Name block — right-aligned, matching Sean's .blockright */}
+      <div className="name-block">
+        <span className="name-block-name">{SITE.name}</span>
+        <br />
+        <span className="name-block-descriptor">{SITE.descriptor}</span>
+      </div>
 
-        <section className="mt-12 md:mt-16 space-y-5 text-[1.0625rem] md:text-[1.125rem] leading-[1.72]">
-          {SITE.bio.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </section>
-      </main>
+      <div className="block-clear" />
 
-      <footer className="mt-20 md:mt-32 pt-8 border-t border-rule">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-8 md:gap-y-10">
-          <FooterBlock heading="Contact">
-            <ExtLink href={SITE.links.email}>Email</ExtLink>
-          </FooterBlock>
+      {/* Body text — large, matching Sean's .maintext */}
+      <main className="main-text">
+        {SITE.bio.map((p, i) => (
+          <span key={i}>
+            {p}
+            {i < SITE.bio.length - 1 && (
+              <>
+                <br />
+                <br />
+              </>
+            )}
+          </span>
+        ))}
 
-          <FooterBlock heading="LinkedIn">
-            <ExtLink href={SITE.links.linkedin}>LinkedIn</ExtLink>
-          </FooterBlock>
-
-          <FooterBlock heading="GitHub">
-            <ExtLink href={SITE.links.github}>GitHub</ExtLink>
-          </FooterBlock>
-
-          <FooterBlock heading="Beta">
-            <ExtLink href={SITE.links.beta}>Duorin Beta</ExtLink>
-          </FooterBlock>
-
-          <FooterBlock heading="Selected Work">
-            {SITE.work.map((w) => (
-              <div key={w.title}>
-                <ExtLink href={w.href}>{w.title}</ExtLink>
+        {/* Footer band — single grid row for left links + right metadata */}
+        <div className="footer-band">
+          <div className="mini-left">
+            <div className="footer-links-row">
+              <div className="footer-contact">
+                <div className="mono-label">Contact</div>
+                <ExtLink href={SITE.links.email}>E-Mail</ExtLink>
               </div>
-            ))}
-          </FooterBlock>
+              <div className="footer-social">
+                <div className="mono-label">Social</div>
+                <ExtLink href={SITE.links.linkedin}>LinkedIn</ExtLink>
+              </div>
+            </div>
+            <div className="footer-building">
+              <div className="mono-label">Git</div>
+              <ExtLink href={SITE.links.gitlab}>GitLab</ExtLink>
+            </div>
+          </div>
 
-          <FooterBlock heading="Colophon">
-            {SITE.colophon.map((line) => (
-              <p key={line} className="text-muted">
-                {line}
-              </p>
-            ))}
-          </FooterBlock>
+          <div className="mini-right">
+            <div className="mini-right-col">
+              <div className="meta-heading">Selected Work:</div>
+              {SITE.work.map((w) =>
+                w.href ? (
+                  <a
+                    key={w.title}
+                    href={w.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="meta-link"
+                  >
+                    {w.title}
+                  </a>
+                ) : (
+                  <span key={w.title} className="meta-item">
+                    {w.title}
+                  </span>
+                ),
+              )}
+            </div>
+            <div className="mini-right-col">
+              <div className="meta-heading">Building:</div>
+              {SITE.building.map((b) =>
+                b.href ? (
+                  <a
+                    key={b.title}
+                    href={b.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="meta-link"
+                  >
+                    {b.title}
+                  </a>
+                ) : (
+                  <span key={b.title} className="meta-item">
+                    {b.title}
+                  </span>
+                ),
+              )}
+            </div>
+            <div className="mini-right-col">
+              <div className="meta-heading">Thinking:</div>
+              {SITE.thinking.map((t) => (
+                <span key={t} className="meta-item">
+                  {t}
+                </span>
+              ))}
+            </div>
+            <div className="mini-right-col">
+              <div className="meta-heading">Colophon:</div>
+              {SITE.colophon.map((line) => (
+                <span key={line} className="meta-item">
+                  {line}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-
-        <div className="pb-10 md:pb-16" />
-      </footer>
+      </main>
     </div>
   );
 }
