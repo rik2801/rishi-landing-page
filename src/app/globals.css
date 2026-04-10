@@ -124,6 +124,12 @@ body {
   box-sizing: border-box;
 }
 
+/* Vertical inset only when open — avoids clipping 2px ring; 0fr collapsed row stays flush */
+.color-picker-expand--open .color-picker-expand-inner {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .color-picker-expand {
     transition: none;
@@ -445,7 +451,11 @@ body {
   }
 
   .palette-glass-dock {
-    padding: 10px 12px 12px;
+    /* Extra top breathing room so swatch rings / hover scale don’t clip at the rim */
+    padding-top: clamp(12px, 2.8vw + 8px, 18px);
+    padding-right: 12px;
+    padding-bottom: 12px;
+    padding-left: 12px;
     border-radius: 18px;
     max-width: calc(100vw - 16px);
   }
@@ -523,5 +533,10 @@ body {
   .palette-switcher-placeholder {
     height: 16px;
     width: 126px;
+  }
+
+  .color-picker-expand--open .color-picker-expand-inner {
+    padding-top: clamp(10px, 3.5vw, 20px);
+    padding-bottom: clamp(10px, 2.8vw, 16px);
   }
 }
