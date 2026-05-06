@@ -40,7 +40,7 @@ const CASE_STUDIES: CaseStudyListItem[] = [
     href: "/case-studies/snacknu",
   },
   {
-    title: "CitizenX",
+    title: "Citizen-X",
     description:
       "A civic product designed to help users compare political parties through manifesto-based questions instead of personality-driven bias.",
     roleLabel: "Civic UX · Information Architecture",

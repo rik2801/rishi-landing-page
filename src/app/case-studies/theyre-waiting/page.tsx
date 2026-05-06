@@ -15,6 +15,7 @@ export default function TheyreWaitingCaseStudyPage() {
       heroStatement="A productivity surface that uses time-aware friction, urgency, and light emotional accountability to interrupt procrastination loops without shame-based patterns."
       role="Product Designer · Prototype direction"
       duration="Exploration"
+      metaGridVariant="bordered"
       stack="Figma · UX writing · notification flows · early interaction specs"
       whyItMatters={[
         "Avoidance is often emotional and temporal — products that only optimize lists miss the last mile before work starts.",

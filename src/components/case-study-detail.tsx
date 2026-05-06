@@ -35,6 +35,13 @@ export type CaseStudyProductEvolution = {
   narrative: string;
 };
 
+export type CaseStudyScreenshot = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
 export type CaseStudyDetailProps = {
   name: string;
   /** Optional live product URL shown as a small bracketed link next to the title, e.g. (duorin.com) */
@@ -56,6 +63,10 @@ export type CaseStudyDetailProps = {
   whyItMatters: string[];
   /** Optional before/after narrative (e.g. Duorin product evolution) */
   productEvolution?: CaseStudyProductEvolution;
+  heroScreenshot?: CaseStudyScreenshot;
+  postInsightScreenshot?: CaseStudyScreenshot;
+  postInsightScreenshotCaption?: string;
+  postSystemScreenshot?: CaseStudyScreenshot;
   systemOverview?: {
     intro: string;
     pipelineNodes?: string[];
@@ -66,11 +77,16 @@ export type CaseStudyDetailProps = {
     };
   };
   earlySignalsFromBeta?: {
+    title?: string;
     paragraphs: string[];
     bullets: string[];
     insight: string;
     closing?: string;
   };
+  biasReduction?: {
+    paragraphs: string[];
+  };
+  operationalConstraints?: string[];
   /** Duorin: high-level product principles */
   keyProductDecisions?: string[];
   problem: {
@@ -111,8 +127,14 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
     metaGridVariant = "editorial",
     whyItMatters,
     productEvolution,
+    heroScreenshot,
+    postInsightScreenshot,
+    postInsightScreenshotCaption,
+    postSystemScreenshot,
     systemOverview,
     earlySignalsFromBeta,
+    biasReduction,
+    operationalConstraints,
     keyProductDecisions,
     problem,
     coreInsight,
@@ -223,6 +245,20 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           )}
         </header>
 
+        {heroScreenshot ? (
+          <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--hero">
+            <Image
+              src={heroScreenshot.src}
+              alt={heroScreenshot.alt}
+              width={heroScreenshot.width}
+              height={heroScreenshot.height}
+              sizes="(max-width: 900px) 100vw, 820px"
+              className="case-study-screenshot case-study-screenshot--hero"
+              draggable={false}
+            />
+          </section>
+        ) : null}
+
         <section className="case-study-section case-study-section--after-hero">
           <h2 className="case-study-section-heading">Why this matters</h2>
           {whyItMatters.map((paragraph, i) => (
@@ -251,6 +287,27 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                 {coreInsightDifferentiator}
               </p>
             ) : null}
+          </section>
+        ) : null}
+
+        {postInsightScreenshot ? (
+          <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--post-insight">
+            <div className="case-study-screenshot-stack">
+              <Image
+                src={postInsightScreenshot.src}
+                alt={postInsightScreenshot.alt}
+                width={postInsightScreenshot.width}
+                height={postInsightScreenshot.height}
+                sizes="(max-width: 900px) 92vw, 680px"
+                className="case-study-screenshot case-study-screenshot--post-insight"
+                draggable={false}
+              />
+              {postInsightScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">
+                  {postInsightScreenshotCaption}
+                </p>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -365,7 +422,9 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
 
         {earlySignalsFromBeta ? (
           <section className="case-study-section">
-            <h2 className="case-study-section-heading">Early Signals from Beta</h2>
+            <h2 className="case-study-section-heading">
+              {earlySignalsFromBeta.title ?? "Early Signals from Beta"}
+            </h2>
             {earlySignalsFromBeta.paragraphs.map((paragraph) => (
               <p key={paragraph} className="case-study-prose">
                 {paragraph}
@@ -389,6 +448,28 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                 {earlySignalsFromBeta.closing}
               </p>
             ) : null}
+          </section>
+        ) : null}
+
+        {biasReduction ? (
+          <section className="case-study-section">
+            <h2 className="case-study-section-heading">Bias Reduction</h2>
+            {biasReduction.paragraphs.map((paragraph) => (
+              <p key={paragraph} className="case-study-prose">
+                {paragraph}
+              </p>
+            ))}
+          </section>
+        ) : null}
+
+        {operationalConstraints?.length ? (
+          <section className="case-study-section">
+            <h2 className="case-study-section-heading">Operational Constraints</h2>
+            <ul className="case-study-bullets">
+              {operationalConstraints.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </section>
         ) : null}
 
@@ -440,6 +521,20 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
             </div>
           </div>
         </section>
+
+        {postSystemScreenshot ? (
+          <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--post-system">
+            <Image
+              src={postSystemScreenshot.src}
+              alt={postSystemScreenshot.alt}
+              width={postSystemScreenshot.width}
+              height={postSystemScreenshot.height}
+              sizes="(max-width: 900px) 62vw, 360px"
+              className="case-study-screenshot case-study-screenshot--post-system"
+              draggable={false}
+            />
+          </section>
+        ) : null}
 
         <section className="case-study-section">
           <h2 className="case-study-section-heading">Impact</h2>

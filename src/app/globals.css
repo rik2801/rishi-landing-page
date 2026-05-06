@@ -44,11 +44,12 @@ body {
 }
 
 .palette-glass-dock {
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top));
-  left: 50%;
+  position: fixed !important;
+  top: max(12px, env(safe-area-inset-top)) !important;
+  left: 50% !important;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 2147483647;
+  will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1034,6 +1035,61 @@ body {
 
 .case-study-flow-text {
   color: var(--fg);
+}
+
+.case-study-screenshot-block {
+  display: flex;
+  justify-content: center;
+}
+
+.case-study-screenshot-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.case-study-screenshot {
+  display: block;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--case-study-surface-radius, 10px);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.case-study-screenshot--hero {
+  max-width: 60%;
+}
+
+.case-study-screenshot--post-insight {
+  max-width: min(68%, 720px);
+}
+
+.case-study-screenshot--post-system {
+  max-width: min(33%, 255px);
+}
+
+.case-study-screenshot-caption {
+  margin-top: 0.45rem;
+  margin-bottom: 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.58;
+  text-align: center;
+}
+
+.case-study-screenshot-block--post-system {
+  margin-top: 0.45rem;
+  margin-bottom: 0.6rem;
 }
 
 .case-study-reflection-label {

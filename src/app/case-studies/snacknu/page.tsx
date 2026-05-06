@@ -15,6 +15,7 @@ export default function SnacknuCaseStudyPage() {
       heroStatement="A closed-loop marketplace concept for moving surplus snacks on campus with lightweight listings, trust cues, and pickup flows tuned for student schedules."
       role="Product Designer · Systems & flows"
       duration="Concept / coursework-adjacent"
+      metaGridVariant="bordered"
       stack="User journeys · service blueprint · low-fi UI · trust & safety notes"
       whyItMatters={[
         "Campus surplus is hyper-local and time-bound — coordination beats catalog breadth when inventory is messy and informal.",
