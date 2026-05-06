@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PaletteSwitcher } from "@/components/palette-switcher";
 
 const SITE = {
@@ -31,7 +32,10 @@ const SITE = {
     "Decision-making systems",
     "Interfaces that feel alive",
   ],
-  colophon: ["Built by Rishi Kiran"],
+  colophon: [
+    { text: "Built by Rishi Kiran" },
+    { text: "Case Studies", href: "/case-studies" },
+  ],
 };
 
 function ExtLink(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
@@ -159,11 +163,17 @@ export default function Home() {
             </div>
             <div className="mini-right-col">
               <div className="meta-heading">Colophon:</div>
-              {SITE.colophon.map((line) => (
-                <span key={line} className="meta-item">
-                  {line}
-                </span>
-              ))}
+              {SITE.colophon.map((item) =>
+                item.href ? (
+                  <Link key={item.text} href={item.href} className="meta-link">
+                    {item.text}
+                  </Link>
+                ) : (
+                  <span key={item.text} className="meta-item">
+                    {item.text}
+                  </span>
+                ),
+              )}
             </div>
           </div>
         </div>

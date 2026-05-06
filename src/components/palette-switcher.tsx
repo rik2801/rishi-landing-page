@@ -43,38 +43,6 @@ export const PALETTES = [
     border: "#143898",
     swatch: ["#1843b4", "#fc6e0e"],
   },
-  {
-    id: "violet",
-    bg: "#9d19b3",
-    fg: "#8aff44",
-    muted: "#c890d8",
-    border: "#881098",
-    swatch: ["#9d19b3", "#8aff44"],
-  },
-  {
-    id: "jade",
-    bg: "#21a87f",
-    fg: "#fefd75",
-    muted: "#78c8a8",
-    border: "#1a9070",
-    swatch: ["#21a87f", "#fefd75"],
-  },
-  {
-    id: "sol",
-    bg: "#E8E83A",
-    fg: "#1843b3",
-    muted: "#989810",
-    border: "#d8d810",
-    swatch: ["#E8E83A", "#1843b3"],
-  },
-  {
-    id: "azure",
-    bg: "#1077f8",
-    fg: "#effb72",
-    muted: "#78b0f0",
-    border: "#0c60d0",
-    swatch: ["#1077f8", "#effb72"],
-  },
 ] as const;
 
 const STORAGE_PALETTE = "palette";
@@ -146,6 +114,10 @@ export function PaletteSwitcher() {
         /* invalid stored custom */
       }
       localStorage.removeItem(STORAGE_CUSTOM);
+      localStorage.setItem(STORAGE_PALETTE, "default");
+      resolved = "default";
+    }
+    if (!PALETTES.some((pl) => pl.id === resolved)) {
       localStorage.setItem(STORAGE_PALETTE, "default");
       resolved = "default";
     }
