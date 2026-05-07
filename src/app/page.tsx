@@ -17,24 +17,16 @@ const SITE = {
     gitlab: "https://gitlab.com/rishikiran.rik28",
     beta: "https://duorin.com",
   },
-  work: [
-    { title: "Duorin", href: "https://duorin.com" },
-    { title: "Treevah", href: "https://www.treevah.com/" },
-    { title: "Snack\u2019nU", href: null },
+  caseStudies: [
+    { title: "Duorin", href: "/case-studies/duorin" },
+    { title: "They\u2019re Waiting", href: "/case-studies/theyre-waiting" },
+    { title: "SnacknU", href: "/case-studies/snacknu" },
+    { title: "CitizenX", href: "/case-studies/citizenx" },
   ],
-  building: [
-    { title: "Duorin (Beta)", href: "https://duorin.com" },
-    { title: "AI decision interfaces", href: null },
-    { title: "Personal tooling experiments", href: null },
-  ],
-  thinking: [
-    "AI products",
-    "Decision-making systems",
+  exploring: [
+    "AI decision interfaces",
+    "Behavioral systems",
     "Interfaces that feel alive",
-  ],
-  colophon: [
-    { text: "Built by Rishi Kiran" },
-    { text: "Case Studies", href: "/case-studies" },
   ],
 };
 
@@ -114,66 +106,20 @@ export default function Home() {
 
           <div className="mini-right">
             <div className="mini-right-col">
-              <div className="meta-heading">Selected Work:</div>
-              {SITE.work.map((w) =>
-                w.href ? (
-                  <a
-                    key={w.title}
-                    href={w.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="meta-link"
-                  >
-                    {w.title}
-                  </a>
-                ) : (
-                  <span key={w.title} className="meta-item">
-                    {w.title}
-                  </span>
-                ),
-              )}
-            </div>
-            <div className="mini-right-col">
-              <div className="meta-heading">Building:</div>
-              {SITE.building.map((b) =>
-                b.href ? (
-                  <a
-                    key={b.title}
-                    href={b.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="meta-link"
-                  >
-                    {b.title}
-                  </a>
-                ) : (
-                  <span key={b.title} className="meta-item">
-                    {b.title}
-                  </span>
-                ),
-              )}
-            </div>
-            <div className="mini-right-col">
-              <div className="meta-heading">Thinking:</div>
-              {SITE.thinking.map((t) => (
-                <span key={t} className="meta-item">
-                  {t}
-                </span>
+              <div className="meta-heading meta-heading--primary">Case Studies:</div>
+              {SITE.caseStudies.map((item) => (
+                <Link key={item.title} href={item.href} className="meta-link meta-link--primary">
+                  {item.title}
+                </Link>
               ))}
             </div>
             <div className="mini-right-col">
-              <div className="meta-heading">Colophon:</div>
-              {SITE.colophon.map((item) =>
-                item.href ? (
-                  <Link key={item.text} href={item.href} className="meta-link">
-                    {item.text}
-                  </Link>
-                ) : (
-                  <span key={item.text} className="meta-item">
-                    {item.text}
-                  </span>
-                ),
-              )}
+              <div className="meta-heading meta-heading--secondary">Exploring:</div>
+              {SITE.exploring.map((item) => (
+                <span key={item} className="meta-item meta-item--secondary">
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
         </div>
