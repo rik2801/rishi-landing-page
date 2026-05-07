@@ -445,17 +445,26 @@ body {
   opacity: 0.42;
 }
 
+.meta-heading-link {
+  display: inline-block;
+  color: var(--fg);
+  text-decoration: underline !important;
+  text-decoration-thickness: 0.04em;
+  text-underline-offset: 0.12em;
+}
+
+.meta-heading-link:hover {
+  opacity: 0.9;
+}
+
 .meta-link--primary {
   opacity: 0.96;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--fg) 38%, transparent);
-  text-decoration-thickness: 0.04em;
-  text-underline-offset: 0.15em;
+  text-decoration: none !important;
 }
 
 .meta-link--primary:hover {
   opacity: 0.8;
-  text-decoration-color: color-mix(in srgb, var(--fg) 55%, transparent);
+  text-decoration: none !important;
 }
 
 .meta-item--secondary {

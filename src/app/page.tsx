@@ -106,7 +106,9 @@ export default function Home() {
 
           <div className="mini-right">
             <div className="mini-right-col">
-              <div className="meta-heading meta-heading--primary">Case Studies:</div>
+              <Link href="/case-studies" className="meta-heading meta-heading--primary meta-heading-link">
+                Case Studies:
+              </Link>
               {SITE.caseStudies.map((item) => (
                 <Link key={item.title} href={item.href} className="meta-link meta-link--primary">
                   {item.title}
