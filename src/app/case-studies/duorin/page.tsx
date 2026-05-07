@@ -14,7 +14,7 @@ export default function DuorinCaseStudyPage() {
       titleHref="https://www.duorin.com"
       titleSiteBracket="https://www.duorin.com"
       heroStatement="An AI styling assistant that turns wardrobe, weather, calendar, and preference signals into daily outfit decisions users can trust."
-      role={<>{"Product Designer"}<br />{"(Design + Build)"}</>}
+      role="Product Designer (Design + Build)"
       duration="Dec 2025 – Present"
       designBuild="Figma (flows, system design) · React Native · Expo · FastAPI · PostgreSQL · Redis · AI-assisted decision logic"
       leadership="Led a cross-functional team of 6 across engineering, ML, and growth"

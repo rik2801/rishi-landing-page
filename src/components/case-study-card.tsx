@@ -19,10 +19,12 @@ export function CaseStudyCard({
 }: CaseStudyCardProps) {
   return (
     <article className={featured ? "case-study-card case-study-card--featured" : "case-study-card"}>
-      {featured ? (
-        <p className="case-study-card-featured-label">Featured</p>
-      ) : null}
-      <h2 className="case-study-card-title">{title}</h2>
+      <div className="case-study-card-header">
+        <h2 className="case-study-card-title">{title}</h2>
+        {featured ? (
+          <p className="case-study-card-featured-label">Featured</p>
+        ) : null}
+      </div>
       <p className="case-study-card-role">{roleLabel}</p>
       <p className="case-study-card-desc">{description}</p>
       <div className="case-study-card-cta">

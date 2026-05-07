@@ -10,13 +10,14 @@ export const metadata: Metadata = {
 export default function CitizenxCaseStudyPage() {
   return (
     <CaseStudyDetail
+      screenshotPresentation="citizenx"
       name="Citizen-X"
       heroStatement="A politically neutral decision-mapping system built during the Tamil Nadu election cycle, where policy data was incomplete, timelines shifted, and interpretation quality determined trust."
       heroScreenshot={{
         src: "/citizenx-landing.webp",
-        alt: "Citizen-X landing experience",
-        width: 1536,
-        height: 1024,
+        alt: "CitizenX landing screen",
+        width: 1672,
+        height: 941,
       }}
       role="Product Designer · Research & Decision Systems"
       duration="Mar 2026 - May 2026"
@@ -38,7 +39,7 @@ export default function CitizenxCaseStudyPage() {
       coreInsight="Political alignment is not a binary preference problem - it is an interpretation problem. Most civic tools compress nuance into oversimplified scores. Citizen-X focused on exposing reasoning, weighting tradeoffs, and handling uncertainty instead of pretending certainty."
       postInsightScreenshot={{
         src: "/citizenx-question-flow.webp",
-        alt: "Citizen-X question mapping flow",
+        alt: "CitizenX question flow screen",
         width: 1536,
         height: 1024,
       }}
@@ -74,7 +75,7 @@ export default function CitizenxCaseStudyPage() {
       }}
       postSystemScreenshot={{
         src: "/citizenx-results-mobile.webp",
-        alt: "Citizen-X mobile results view",
+        alt: "CitizenX results mobile screen",
         width: 853,
         height: 1844,
       }}

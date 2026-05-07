@@ -4,68 +4,128 @@ import { CaseStudyDetail } from "@/components/case-study-detail";
 export const metadata: Metadata = {
   title: "They’re Waiting — Case Study — Rishi Kiran",
   description:
-    "Time-aware nudges and emotional accountability to reduce procrastination — case study in progress.",
+    "A behavioral accountability system that interrupts emotionally resisted tasks through timing, urgency, and lightweight social pressure.",
 };
 
 export default function TheyreWaitingCaseStudyPage() {
   return (
     <CaseStudyDetail
-      inProgress
+      screenshotPresentation="theyre-waiting"
       name="They’re Waiting"
-      heroStatement="A productivity surface that uses time-aware friction, urgency, and light emotional accountability to interrupt procrastination loops without shame-based patterns."
-      role="Product Designer · Prototype direction"
-      duration="Exploration"
+      heroStatement="A behavioral accountability system designed to interrupt avoidance loops around emotionally resisted tasks using urgency, timing, and lightweight social pressure."
+      heroScreenshot={{
+        src: "/homepage.webp",
+        alt: "They’re Waiting home screen",
+        width: 440,
+        height: 916,
+      }}
+      heroScreenshotCaption="Task overview and behavioral scheduling surface."
+      heroScreenshotCompact
+      role="Product Designer · Behavioral UX Systems"
+      duration="Buildathon Prototype · 2026"
       metaGridVariant="bordered"
-      stack="Figma · UX writing · notification flows · early interaction specs"
+      designBuild="Interaction design · Notification systems · Voice task parsing · Behavioral timing flows · AI-assisted task extraction"
+      leadershipLabel="Context"
+      leadership="Built during a Replit buildathon to explore accountability mechanics around emotionally resisted tasks"
       whyItMatters={[
-        "Avoidance is often emotional and temporal — products that only optimize lists miss the last mile before work starts.",
-        "Notification and tone choices directly affect retention and trust; this work treats timing and copy as product decisions, not decorations.",
-        "For teams shipping habit-adjacent tools, the thesis is whether interrupts can feel supportive without sliding into manipulation.",
+        "Most productivity systems optimize for organization, not avoidance. Users often know exactly what they need to do, but still delay emotionally resisted tasks because the friction is psychological, not informational.",
+        "They’re Waiting explored whether timing, interruption mechanics, and lightweight accountability pressure could reduce procrastination without relying on shame-based productivity patterns.",
       ]}
       problem={{
         intro:
-          "Many productivity tools optimize for task capture and dashboards, not for the moment right before avoidance. The design question was how to create timely interrupts that feel supportive rather than punitive, especially around deadlines and obligations users already feel guilty about.",
+          "The product was built around the intent-versus-action gap: users repeatedly saw the same high-stakes tasks but still avoided them at the exact moment a decision had to be made.",
         bullets: [
-          "Nudges often arrive at the wrong emotional temperature — either too soft to matter or too aggressive to trust.",
-          "Time sensitivity and social or emotional stakes needed to be represented without manipulative dark patterns.",
-          "The system had to work alongside existing calendars and habits rather than replace them.",
+          "Emotionally resisted tasks stayed visible in task lists for days while lower-friction work got completed first.",
+          "Traditional reminders became background noise after repeated dismissals and stopped influencing behavior.",
+          "Avoidance intensified near difficult actions such as outreach, follow-ups, and uncomfortable conversations.",
+          "Most task apps captured plans well but failed at the exact moment action was postponed.",
         ],
       }}
+      coreInsight="Productivity failure is often not a planning problem — it is an avoidance problem. The hardest tasks are usually emotionally resisted tasks: outreach, difficult conversations, follow-ups, or actions tied to rejection, uncertainty, or social discomfort. The product focused on interrupting avoidance at the moment action is delayed, not simply organizing tasks earlier."
+      postInsightScreenshot={{
+        src: "/Notification.webp",
+        alt: "They’re Waiting accountability notification screen",
+        width: 440,
+        height: 916,
+      }}
+      postInsightScreenshotCaption={
+        <>
+          Time-aware interruption designed to surface emotionally resisted tasks
+          <br />
+          before avoidance escalates.
+        </>
+      }
+      postInsightScreenshotCompact
       approach={[
         {
-          decision: "Anchor prompts to concrete windows of time, not abstract ‘later’.",
+          decision:
+            "Anchor tasks to real-time interruption windows instead of passive reminders.",
           whyItMattered:
-            "Vague reminders recycle procrastination. Anchoring to a specific soon window makes the next step easier to take.",
+            "Triggering prompts in narrow, context-aware windows created urgency at the point of likely delay rather than adding another item to a backlog.",
         },
         {
-          decision: "Separate urgency from moral judgment in copy and visuals.",
+          decision:
+            "Use swipe, snooze, and completion mechanics to force lightweight behavioral acknowledgment.",
           whyItMattered:
-            "If the product reads as scolding, users disengage. The goal was honest time pressure without shame framing.",
+            "Each interruption required a small action: complete now, snooze intentionally, or swipe to acknowledge. This reduced passive dismissal and made avoidance patterns visible.",
         },
         {
-          decision: "Prototype notification cadence as a first-class design surface.",
+          decision:
+            "Treat notification tone and cadence as part of the product system, not decorative copywriting.",
           whyItMattered:
-            "The behavior change thesis lives or dies in timing, repetition, and quiet hours — not only in the in-app UI.",
+            "Escalation language, reminder spacing, and pressure limits directly affected trust and re-engagement, so messaging behavior was designed as core interaction logic.",
         },
       ]}
+      systemLogicTitle="Behavioral Accountability System"
       systemLogic={{
         input:
-          "Calendar and deadline signals, user-stated intent, quiet hours, and lightweight feedback on whether a nudge helped.",
+          "Voice or typed task intent, deadlines, urgency windows, task category, and user interaction history.",
         logic:
-          "Score tasks by time-to-deadline and avoidance risk, choose channel and tone, cap frequency, and adjust based on dismiss patterns.",
+          "Extract actionable tasks from natural language, parse date/time from speech or text, schedule interruption timing, escalate accountability pressure carefully, and adapt reminders based on snooze or dismiss behavior.",
         output:
-          "Short, time-bounded prompts with a single obvious action and optional reflection after completion.",
+          "Short high-attention prompts with immediate actions, swipe acknowledgment, optional snooze, completion confirmation, and lightweight progress tracking.",
       }}
+      postSystemScreenshot={{
+        src: "/swippable-interface.webp",
+        alt: "They’re Waiting swipe interaction interface",
+        width: 440,
+        height: 916,
+      }}
+      postSystemScreenshotLeadSpace
+      postSystemScreenshotCaption={
+        <>
+          High-friction completion flow using swipe acknowledgment
+          <br />
+          and intentional snooze actions.
+        </>
+      }
       impact={[
-        "Clarified a repeatable structure for ‘interrupt’ moments versus ‘planning’ moments in the product narrative.",
-        "Surfaced edge cases around emotional tone that need validation before any scaled rollout.",
-        "Established a foundation for user testing around notification trust and frequency caps.",
+        "Validated an interruption model where swipe-to-complete and intentional snooze actions reduced passive reminder dismissal.",
+        "Made behavioral response patterns measurable through completion visibility, snooze frequency, and repeated deferral tracking.",
+        "Showed that accountability-style notification cadence can increase action on resisted tasks when escalation stays bounded and non-shaming.",
+        "Established an interaction baseline for task parsing, categorization, and timing pressure that can be tested against real schedules.",
       ]}
+      postImpactScreenshot={{
+        src: "/stats.webp",
+        alt: "They’re Waiting progress and deferral tracking stats",
+        width: 440,
+        height: 916,
+      }}
+      postImpactScreenshotLeadSpace
+      postImpactScreenshotCaption={
+        <>
+          Behavioral tracking focused on follow-through patterns,
+          <br />
+          deferral frequency, and interruption response.
+        </>
+      }
       reflection={{
         didNotWork:
-          "Early storyboards over-relied on messaging metaphors that tested well in isolation but felt inconsistent as a system.",
+          "The hardest challenge was balancing accountability pressure without making the product feel manipulative or emotionally exhausting over time.",
         improveNext:
-          "Run structured sessions on tone and timing with real schedules, and validate opt-out and snooze behavior before refining visuals.",
+          "Validate interruption tolerance, escalation timing, and long-term notification fatigue using real user schedules and repeated task patterns.",
+        limitationLabel: "Current limitation:",
+        nextIterationLabel: "Next iteration focus:",
       }}
     />
   );

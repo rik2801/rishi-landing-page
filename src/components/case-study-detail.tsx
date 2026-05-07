@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -57,6 +57,8 @@ export type CaseStudyDetailProps = {
   designBuild?: string;
   /** Optional fourth meta row; label renders as LEADERSHIP. */
   leadership?: string;
+  /** Optional label override for the fourth meta row. */
+  leadershipLabel?: string;
   /** Duorin: visible bordered CSS-grid meta cells vs editorial dividers. */
   metaGridVariant?: "editorial" | "bordered";
   /** 2–3 short paragraphs: why the problem matters for users, product, or business */
@@ -64,9 +66,29 @@ export type CaseStudyDetailProps = {
   /** Optional before/after narrative (e.g. Duorin product evolution) */
   productEvolution?: CaseStudyProductEvolution;
   heroScreenshot?: CaseStudyScreenshot;
+  heroScreenshotCompact?: boolean;
+  heroScreenshotCaption?: ReactNode;
   postInsightScreenshot?: CaseStudyScreenshot;
-  postInsightScreenshotCaption?: string;
+  postInsightScreenshotCompact?: boolean;
+  postInsightScreenshotCaption?: ReactNode;
+  /** After Design Approach, before system logic / Service Loop. */
+  postApproachScreenshot?: CaseStudyScreenshot;
+  postApproachScreenshotCaption?: ReactNode;
+  /** Sketch/process artifact between Design Approach and Service Loop. */
+  processArtifactScreenshot?: CaseStudyScreenshot;
+  processArtifactCaption?: ReactNode;
   postSystemScreenshot?: CaseStudyScreenshot;
+  postSystemScreenshotCaption?: ReactNode;
+  /** Extra vertical pause before the post-system screenshot (e.g. after system logic). */
+  postSystemScreenshotLeadSpace?: boolean;
+  /** After system logic / Service Loop, before Stakeholder Reality when present. */
+  postServiceLoopScreenshot?: CaseStudyScreenshot;
+  postServiceLoopScreenshotCaption?: ReactNode;
+  postServiceLoopScreenshotLeadSpace?: boolean;
+  postImpactScreenshot?: CaseStudyScreenshot;
+  postImpactScreenshotCaption?: ReactNode;
+  /** Extra vertical pause before the post-impact screenshot (e.g. after Impact). */
+  postImpactScreenshotLeadSpace?: boolean;
   systemOverview?: {
     intro: string;
     pipelineNodes?: string[];
@@ -102,6 +124,10 @@ export type CaseStudyDetailProps = {
     output: string;
   };
   systemLogicTitle?: string;
+  /** Placed immediately after Input/Logic/Output flow (e.g. stakeholder grounding). */
+  stakeholderReality?: string;
+  /** Page-specific screenshot rhythm presets. */
+  screenshotPresentation?: "snacknu" | "theyre-waiting" | "citizenx";
   impact: string[];
   reflection: {
     didNotWork: string;
@@ -124,13 +150,29 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
     stack,
     designBuild,
     leadership,
+    leadershipLabel = "Leadership",
     metaGridVariant = "editorial",
     whyItMatters,
     productEvolution,
     heroScreenshot,
+    heroScreenshotCompact = false,
+    heroScreenshotCaption,
     postInsightScreenshot,
+    postInsightScreenshotCompact = false,
     postInsightScreenshotCaption,
+    postApproachScreenshot,
+    postApproachScreenshotCaption,
+    processArtifactScreenshot,
+    processArtifactCaption,
     postSystemScreenshot,
+    postSystemScreenshotCaption,
+    postSystemScreenshotLeadSpace = false,
+    postServiceLoopScreenshot,
+    postServiceLoopScreenshotCaption,
+    postServiceLoopScreenshotLeadSpace = false,
+    postImpactScreenshot,
+    postImpactScreenshotCaption,
+    postImpactScreenshotLeadSpace = false,
     systemOverview,
     earlySignalsFromBeta,
     biasReduction,
@@ -142,13 +184,37 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
     approach,
     systemLogic,
     systemLogicTitle,
+    stakeholderReality,
+    screenshotPresentation,
     impact,
     reflection,
     inProgress,
   } = props;
 
+  const snacknuScreens = screenshotPresentation === "snacknu";
+  const theyreWaitingScreens = screenshotPresentation === "theyre-waiting";
+  const citizenxScreens = screenshotPresentation === "citizenx";
+  const isPostApproachSketch = postApproachScreenshot?.src.includes("sketch-paper.webp") ?? false;
+  const mobileUnifiedClass = "case-study-screenshot--snacknu-unified";
+  const mobileUnifiedSizes = "(max-width: 900px) min(92vw, 300px), 300px";
+  /** Mirrors `.case-study-screenshot--snacknu-unified`; inline so cached CSS cannot stale sizing. */
+  const snacknuScreenshotStyle: CSSProperties | undefined = snacknuScreens
+    ? { maxWidth: "min(92vw, 300px)", width: "100%", height: "auto" }
+    : undefined;
+  const sketchInlineStyle: CSSProperties = { width: "76.5%", height: "auto" };
+
   return (
-    <div className="case-study-detail-wrap">
+    <div
+      className={
+        snacknuScreens
+          ? "case-study-detail-wrap case-study-detail-wrap--snacknu-screens"
+          : theyreWaitingScreens
+            ? "case-study-detail-wrap case-study-detail-wrap--theyre-waiting-screens"
+            : citizenxScreens
+              ? "case-study-detail-wrap case-study-detail-wrap--citizenx-screens"
+              : "case-study-detail-wrap"
+      }
+    >
       <div className="case-study-detail-inner">
         <p className="case-study-back">
           <Link href="/" className="link">
@@ -207,7 +273,7 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
               ) : null}
               {leadership ? (
                 <div className="case-study-meta-cell case-study-meta-cell-span">
-                  <dt>Leadership</dt>
+                  <dt>{leadershipLabel}</dt>
                   <dd>{leadership}</dd>
                 </div>
               ) : null}
@@ -237,7 +303,7 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
               ) : null}
               {leadership ? (
                 <div className="case-study-meta-span">
-                  <dt>Leadership</dt>
+                  <dt>{leadershipLabel}</dt>
                   <dd>{leadership}</dd>
                 </div>
               ) : null}
@@ -247,15 +313,37 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
 
         {heroScreenshot ? (
           <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--hero">
-            <Image
-              src={heroScreenshot.src}
-              alt={heroScreenshot.alt}
-              width={heroScreenshot.width}
-              height={heroScreenshot.height}
-              sizes="(max-width: 900px) 100vw, 820px"
-              className="case-study-screenshot case-study-screenshot--hero"
-              draggable={false}
-            />
+            <div className="case-study-screenshot-stack">
+              <Image
+                src={heroScreenshot.src}
+                alt={heroScreenshot.alt}
+                width={heroScreenshot.width}
+                height={heroScreenshot.height}
+                sizes={
+                  snacknuScreens
+                    ? mobileUnifiedSizes
+                    : heroScreenshotCompact
+                      ? "(max-width: 900px) 62vw, 360px"
+                      : "(max-width: 900px) 100vw, 820px"
+                }
+                priority={snacknuScreens}
+                unoptimized={snacknuScreens}
+                style={snacknuScreenshotStyle}
+                className={`case-study-screenshot ${
+                  snacknuScreens
+                    ? mobileUnifiedClass
+                    : heroScreenshotCompact
+                      ? "case-study-screenshot--post-system"
+                      : "case-study-screenshot--hero"
+                }`}
+                draggable={false}
+              />
+              {heroScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">
+                  {heroScreenshotCaption}
+                </p>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -298,8 +386,16 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                 alt={postInsightScreenshot.alt}
                 width={postInsightScreenshot.width}
                 height={postInsightScreenshot.height}
-                sizes="(max-width: 900px) 92vw, 680px"
-                className="case-study-screenshot case-study-screenshot--post-insight"
+                sizes={
+                  postInsightScreenshotCompact
+                    ? "(max-width: 900px) 62vw, 360px"
+                    : "(max-width: 900px) 92vw, 680px"
+                }
+                className={`case-study-screenshot ${
+                  postInsightScreenshotCompact
+                    ? "case-study-screenshot--post-system"
+                    : "case-study-screenshot--post-insight"
+                }`}
                 draggable={false}
               />
               {postInsightScreenshotCaption ? (
@@ -502,6 +598,66 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </ol>
         </section>
 
+        {postApproachScreenshot ? (
+          <section
+            className={`case-study-section case-study-screenshot-block${
+              isPostApproachSketch
+                ? " case-study-screenshot-block--artifact"
+                : snacknuScreens
+                  ? ""
+                  : " case-study-screenshot-block--post-system"
+            }`}
+          >
+            <div className="case-study-screenshot-stack">
+              <Image
+                src={postApproachScreenshot.src}
+                alt={postApproachScreenshot.alt}
+                width={postApproachScreenshot.width}
+                height={postApproachScreenshot.height}
+                sizes={
+                  isPostApproachSketch
+                    ? "(max-width: 900px) 92vw, 1061px"
+                    : snacknuScreens
+                      ? mobileUnifiedSizes
+                      : "(max-width: 900px) 62vw, 360px"
+                }
+                unoptimized={snacknuScreens}
+                style={isPostApproachSketch ? sketchInlineStyle : snacknuScreenshotStyle}
+                className={`case-study-screenshot ${
+                  isPostApproachSketch
+                    ? "case-study-screenshot--process-artifact"
+                    : snacknuScreens
+                      ? mobileUnifiedClass
+                      : "case-study-screenshot--post-system"
+                }`}
+                draggable={false}
+              />
+              {postApproachScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">{postApproachScreenshotCaption}</p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {processArtifactScreenshot ? (
+          <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--artifact">
+            <div className="case-study-screenshot-stack">
+              <Image
+                src={processArtifactScreenshot.src}
+                alt={processArtifactScreenshot.alt}
+                width={processArtifactScreenshot.width}
+                height={processArtifactScreenshot.height}
+                sizes="(max-width: 900px) 92vw, 1061px"
+                className="case-study-screenshot case-study-screenshot--process-artifact"
+                draggable={false}
+              />
+              {processArtifactCaption ? (
+                <p className="case-study-screenshot-caption">{processArtifactCaption}</p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
         <section className="case-study-section">
           <h2 className="case-study-section-heading">
             {systemLogicTitle ?? "System Logic"}
@@ -522,17 +678,78 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </div>
         </section>
 
+        {postServiceLoopScreenshot ? (
+          <section
+            className={`case-study-section case-study-screenshot-block${
+              snacknuScreens ? "" : " case-study-screenshot-block--post-system"
+            }`}
+          >
+            <div className="case-study-screenshot-stack">
+              {postServiceLoopScreenshotLeadSpace ? (
+                <p className="case-study-screenshot-lead-space" aria-hidden="true">
+                  &nbsp;
+                </p>
+              ) : null}
+              <Image
+                src={postServiceLoopScreenshot.src}
+                alt={postServiceLoopScreenshot.alt}
+                width={postServiceLoopScreenshot.width}
+                height={postServiceLoopScreenshot.height}
+                sizes={snacknuScreens ? mobileUnifiedSizes : "(max-width: 900px) 62vw, 360px"}
+                unoptimized={snacknuScreens}
+                style={snacknuScreenshotStyle}
+                className={`case-study-screenshot ${
+                  snacknuScreens ? mobileUnifiedClass : "case-study-screenshot--post-system"
+                }`}
+                draggable={false}
+              />
+              {postServiceLoopScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">
+                  {postServiceLoopScreenshotCaption}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {stakeholderReality ? (
+          <section className="case-study-section">
+            <h2 className="case-study-section-heading">Stakeholder Reality</h2>
+            <p className="case-study-prose">{stakeholderReality}</p>
+          </section>
+        ) : null}
+
         {postSystemScreenshot ? (
-          <section className="case-study-section case-study-screenshot-block case-study-screenshot-block--post-system">
-            <Image
-              src={postSystemScreenshot.src}
-              alt={postSystemScreenshot.alt}
-              width={postSystemScreenshot.width}
-              height={postSystemScreenshot.height}
-              sizes="(max-width: 900px) 62vw, 360px"
-              className="case-study-screenshot case-study-screenshot--post-system"
-              draggable={false}
-            />
+          <section
+            className={`case-study-section case-study-screenshot-block${
+              snacknuScreens ? "" : " case-study-screenshot-block--post-system"
+            }`}
+          >
+            <div className="case-study-screenshot-stack">
+              {postSystemScreenshotLeadSpace ? (
+                <p className="case-study-screenshot-lead-space" aria-hidden="true">
+                  &nbsp;
+                </p>
+              ) : null}
+              <Image
+                src={postSystemScreenshot.src}
+                alt={postSystemScreenshot.alt}
+                width={postSystemScreenshot.width}
+                height={postSystemScreenshot.height}
+                sizes={snacknuScreens ? mobileUnifiedSizes : "(max-width: 900px) 62vw, 360px"}
+                unoptimized={snacknuScreens}
+                style={snacknuScreenshotStyle}
+                className={`case-study-screenshot ${
+                  snacknuScreens ? mobileUnifiedClass : "case-study-screenshot--post-system"
+                }`}
+                draggable={false}
+              />
+              {postSystemScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">
+                  {postSystemScreenshotCaption}
+                </p>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -544,6 +761,40 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
             ))}
           </ul>
         </section>
+
+        {postImpactScreenshot ? (
+          <section
+            className={`case-study-section case-study-screenshot-block${
+              snacknuScreens ? "" : " case-study-screenshot-block--post-system"
+            }`}
+          >
+            <div className="case-study-screenshot-stack">
+              {postImpactScreenshotLeadSpace ? (
+                <p className="case-study-screenshot-lead-space" aria-hidden="true">
+                  &nbsp;
+                </p>
+              ) : null}
+              <Image
+                src={postImpactScreenshot.src}
+                alt={postImpactScreenshot.alt}
+                width={postImpactScreenshot.width}
+                height={postImpactScreenshot.height}
+                sizes={snacknuScreens ? mobileUnifiedSizes : "(max-width: 900px) 62vw, 360px"}
+                unoptimized={snacknuScreens}
+                style={snacknuScreenshotStyle}
+                className={`case-study-screenshot ${
+                  snacknuScreens ? mobileUnifiedClass : "case-study-screenshot--post-system"
+                }`}
+                draggable={false}
+              />
+              {postImpactScreenshotCaption ? (
+                <p className="case-study-screenshot-caption">
+                  {postImpactScreenshotCaption}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
 
         <section className="case-study-section">
           <h2 className="case-study-section-heading">Reflection</h2>

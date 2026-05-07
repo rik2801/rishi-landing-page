@@ -26,18 +26,18 @@ const CASE_STUDIES: CaseStudyListItem[] = [
     featured: true,
   },
   {
+    title: "Snack'nU",
+    description:
+      "A campus food-redistribution service concept for surfacing catered surplus after events and routing time-sensitive pickups to nearby students.",
+    roleLabel: "Service Design · Campus Operations",
+    href: "/case-studies/snacknu",
+  },
+  {
     title: "They’re Waiting",
     description:
       "A behavioral productivity product using time-aware nudges, urgency design, and emotional accountability to reduce procrastination.",
     roleLabel: "Behavioral UX · Notification Strategy",
     href: "/case-studies/theyre-waiting",
-  },
-  {
-    title: "SnacknU",
-    description:
-      "A closed-loop campus marketplace concept for redistributing unused snacks through lightweight supply, demand, and trust flows.",
-    roleLabel: "Marketplace Systems · Service Design",
-    href: "/case-studies/snacknu",
   },
   {
     title: "Citizen-X",

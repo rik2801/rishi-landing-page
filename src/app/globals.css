@@ -452,7 +452,7 @@ body {
 }
 
 .case-studies-home-line {
-  margin: 0 0 1.25rem;
+  margin: 0;
 }
 
 .case-studies-home-link {
@@ -467,6 +467,7 @@ body {
   display: grid;
   gap: 1.75rem 2.25rem;
   align-items: center;
+  margin-top: -1.55rem;
 }
 
 .case-studies-hero-copy {
@@ -561,6 +562,7 @@ body {
 .case-study-card {
   border: 1px solid color-mix(in srgb, var(--fg) 32%, transparent);
   padding: 1.5rem 1.25rem;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -575,13 +577,31 @@ body {
   border-color: color-mix(in srgb, var(--fg) 38%, transparent);
 }
 
+.case-study-card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-right: 5.25rem;
+}
+
 .case-study-card-featured-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.42;
-  margin: 0 0 0.2rem;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.9;
+  margin: 0;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  border-radius: 0;
+  padding: 0.2rem 0.48rem;
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+
+.case-study-card--featured .case-study-card-featured-label {
+  position: absolute;
+  top: 1.62rem;
+  right: 1.25rem;
 }
 
 .case-study-card-title {
@@ -611,6 +631,8 @@ body {
 
 .case-study-card-cta {
   margin-top: 0.25rem;
+  align-self: flex-end;
+  text-align: right;
 }
 
 .case-study-detail-wrap {
@@ -1076,7 +1098,7 @@ body {
 }
 
 .case-study-screenshot-caption {
-  margin-top: 0.45rem;
+  margin-top: 0.95rem;
   margin-bottom: 1.2rem;
   font-family: var(--font-mono);
   font-size: 10px;
@@ -1085,11 +1107,94 @@ body {
   color: var(--fg);
   opacity: 0.58;
   text-align: center;
+  white-space: pre-line;
+}
+
+/* Snack'nU: one mobile width for all product shots, calmer captions, even vertical rhythm */
+.case-study-detail-wrap--snacknu-screens .case-study-screenshot--snacknu-unified {
+  /* Readable on retina; static WebPs avoid tiny /_next/image widths */
+  max-width: min(92vw, 300px);
+}
+
+.case-study-detail-wrap--snacknu-screens .case-study-screenshot-block.case-study-section {
+  margin-top: clamp(2rem, 4.5vw, 2.85rem);
+  margin-bottom: clamp(1.65rem, 3.8vw, 2.35rem);
+}
+
+.case-study-detail-wrap--snacknu-screens .case-study-section--after-hero {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.case-study-detail-wrap--snacknu-screens .case-study-screenshot-caption {
+  margin-top: 0.95rem;
+  margin-bottom: 0;
+  letter-spacing: 0.042em;
+  opacity: 0.44;
+}
+
+/* They're Waiting: add a fuller paragraph-like pause before every screenshot caption */
+.case-study-detail-wrap--theyre-waiting-screens .case-study-screenshot-caption {
+  margin-top: 1.9rem !important;
+}
+
+/* CitizenX: make hero image ~30% larger without affecting other pages */
+.case-study-detail-wrap--citizenx-screens .case-study-screenshot--hero {
+  max-width: min(92%, 1060px) !important;
+}
+
+/* CitizenX: increase vertical breathing room around hero image (~50% more) */
+.case-study-detail-wrap--citizenx-screens .case-study-screenshot-block--hero {
+  margin-top: 4.125rem;
+}
+
+.case-study-detail-wrap--citizenx-screens .case-study-section--after-hero {
+  margin-top: 3.375rem;
+}
+
+.case-study-detail-wrap--citizenx-screens .case-study-screenshot-block--hero .case-study-screenshot-stack {
+  padding-top: 1.6rem;
+  padding-bottom: 1.6rem;
+}
+
+
+.case-study-screenshot-block--artifact {
+  margin-top: clamp(2.4rem, 5.2vw, 3.3rem);
+  margin-bottom: clamp(2rem, 4.6vw, 2.9rem);
+}
+
+.case-study-screenshot--process-artifact {
+  width: 76.5%;
+  max-width: min(92vw, 1061px);
+  transform: rotate(-1deg);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+}
+
+.case-study-detail-wrap--snacknu-screens
+  .case-study-screenshot-block--artifact
+  .case-study-screenshot-caption {
+  margin-top: clamp(2.4rem, 5vw, 3rem) !important;
 }
 
 .case-study-screenshot-block--post-system {
   margin-top: 0.45rem;
   margin-bottom: 0.6rem;
+}
+
+/* Empty paragraph rhythm before select post-system screenshots */
+.case-study-screenshot-lead-space {
+  margin: 0;
+  /* ~50% extra pause above prior single-line spacer (~1 prose line) */
+  margin-top: clamp(0.75rem, 2.1vw, 1.05rem);
+  width: 100%;
+  text-align: center;
+  font-size: clamp(16px, 2.1vw, 18px);
+  line-height: 1.55;
+  padding: 0;
+  min-height: clamp(16px, 2.1vw, 18px);
+  visibility: hidden;
+  user-select: none;
+  pointer-events: none;
 }
 
 .case-study-reflection-label {
@@ -1322,7 +1427,7 @@ body {
   border-radius: 8px;
   overflow: hidden;
   padding: 0.38rem;
-  margin: 0.08rem 0 0.08rem;
+  margin: 0.08rem 0 1.1rem;
 }
 
 .case-study-evolution-media {
@@ -1347,12 +1452,19 @@ video.case-study-evolution-media {
 }
 
 .case-study-evolution-caption {
-  margin: 0.45rem 0 0;
+  margin: 1.3rem auto 0;
   font-size: clamp(12px, 1.45vw, 14px);
   line-height: 1.42;
   color: #4b5563;
   opacity: 1;
   max-width: 28ch;
+  text-align: center;
+}
+
+.case-study-evolution-card .case-study-evolution-caption {
+  margin-inline: auto;
+  margin-top: 0 !important;
+  text-align: center !important;
 }
 
 .case-study-evolution-note {
