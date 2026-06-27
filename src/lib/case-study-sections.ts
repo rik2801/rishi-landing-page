@@ -7,11 +7,15 @@ export const CASE_STUDY_SECTION_IDS = {
   overview: "overview",
   heroScreenshot: "hero-screenshot",
   personalMotivation: "personal-motivation",
+  whyBuiltDuorin: "why-i-built-duorin",
   whyThisMatters: "why-this-matters",
   theProblem: "the-problem",
+  turningPoint: "the-turning-point",
   betaLearnings: "beta-learnings",
   coreInsight: "core-insight",
   decisionEngine: "decision-engine",
+  intelligenceLayer: "building-the-intelligence-layer",
+  finalProduct: "final-product",
   strategyTimeline: "what-changed-our-thinking",
   productThinkingShift: "product-thinking-shift",
   hiddenProblem: "the-hidden-problem",
@@ -39,6 +43,7 @@ export const CASE_STUDY_SECTION_IDS = {
 } as const;
 
 export type CaseStudyTocSource = {
+  contentStructure?: "duorin-merged";
   heroScreenshot?: unknown;
   personalMotivation?: { title?: string };
   betaLearnings?: unknown;
@@ -75,6 +80,55 @@ export function buildCaseStudyTocItems(source: CaseStudyTocSource): CaseStudyToc
   const items: CaseStudyTocItem[] = [
     { id: CASE_STUDY_SECTION_IDS.overview, label: "Overview" },
   ];
+
+  if (source.contentStructure === "duorin-merged") {
+    if (source.personalMotivation) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.whyBuiltDuorin,
+        label: source.personalMotivation.title ?? "Why I Built Duorin",
+      });
+    }
+
+    items.push({
+      id: CASE_STUDY_SECTION_IDS.turningPoint,
+      label: "The Turning Point",
+    });
+
+    if (source.decisionEngine) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.decisionEngine,
+        label: source.decisionEngine.tocLabel ?? "Decision Engine",
+      });
+    }
+
+    if (source.hiddenProblem || source.systemsProcessLayer) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.intelligenceLayer,
+        label: source.systemsProcessLayer?.title ?? "Building the Intelligence Layer",
+      });
+    }
+
+    if (source.productEvolution) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.productEvolution,
+        label: "Product Evolution",
+      });
+    }
+
+    if (source.finalExperience || source.productWalkthrough) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.finalProduct,
+        label: source.finalExperience?.title ?? "Final Product",
+      });
+    }
+
+    items.push({
+      id: CASE_STUDY_SECTION_IDS.reflection,
+      label: source.reflection?.title ?? "Reflection",
+    });
+
+    return items;
+  }
 
   if (source.personalMotivation) {
     items.push({
