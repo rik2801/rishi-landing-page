@@ -1889,9 +1889,8 @@ body {
   text-align: center;
 }
 
-.case-study-final-experience > .case-study-prose:first-of-type {
+.case-study-final-experience > .case-study-prose:not(.case-study-final-experience-closing) {
   padding-bottom: 5%;
-  box-sizing: border-box;
 }
 
 .case-study-final-experience-figure {
