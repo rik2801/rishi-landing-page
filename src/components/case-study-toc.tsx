@@ -256,7 +256,9 @@ export function CaseStudyTOC({ items }: CaseStudyTOCProps) {
                   onClick={() => scrollToSection(id)}
                 >
                   <span className="case-study-toc-label">{label}</span>
-                  <span className="case-study-toc-marker" aria-hidden="true" />
+                  <span className="case-study-toc-marker-slot" aria-hidden="true">
+                    <span className="case-study-toc-marker" />
+                  </span>
                 </button>
               </li>
             );

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 export default function DuorinCaseStudyPage() {
   return (
     <CaseStudyDetail
+      contentStructure="duorin-merged"
       name="Duorin"
       titleHref="https://www.duorin.com"
       titleSiteBracket="https://www.duorin.com"
@@ -19,49 +20,47 @@ export default function DuorinCaseStudyPage() {
       designBuild="Figma (flows, system design) · React Native · Expo · FastAPI · PostgreSQL · Redis · AI-assisted decision logic"
       leadership="Led a cross-functional team of 6 across engineering, ML, and growth"
       metaGridVariant="bordered"
+      scopeStrip={[
+        {
+          label: "6-person team",
+          iconSrc: "/icons/6-members.webp",
+          iconAlt: "Team icon",
+        },
+        {
+          label: "43 beta users",
+          iconSrc: "/icons/43-members.webp",
+          iconAlt: "Beta users icon",
+        },
+      ]}
       personalMotivation={{
+        title: "Why I Built Duorin",
         paragraphs: [
-          "I found myself spending more time deciding what to wear than I wanted to admit.",
-          "Most styling apps generated endless inspiration, but none answered the simple question I cared about:",
+          "Most styling apps optimize for inspiration rather than decisions.",
+          "They generate endless outfit combinations, but rarely answer the one question users actually have:",
           "\u201cWhat should I wear today?\u201d",
-          "Duorin started as an attempt to solve that problem.",
+          "Duorin was built to explore whether AI could reduce decision fatigue instead of generating more inspiration.",
         ],
       }}
-      whyItMatters={[
-        "Personal styling is a high-frequency decision surface: if users do not trust the product, they churn before model quality gets a fair test.",
-        "The hard problem is not generating attractive outfits. It is earning trust through explainable, contextual recommendations that hold up on real mornings.",
-        "The product reduces decision fatigue through clear logic and actionable outcomes.",
-      ]}
+      whyItMatters={[]}
       problem={{
         intro:
-          "Most styling apps fail because they optimize for option volume, not decision quality. Recommendations look good but ignore context, so users cannot trust them when they need to get dressed.",
-        bullets: [
-          "Trust breaks when users cannot follow why an outfit was selected.",
-          "Calendar, weather, and wardrobe signals must compound in a clear order.",
-          "Too many weak options increase cognitive load instead of reducing it.",
-        ],
+          "Most styling apps optimize for option volume, not decision quality. Recommendations can look good but still fail when users cannot understand why they appeared or how they fit the day.",
+        bullets: [],
       }}
       betaLearnings={{
         paragraphs: [
-          "Duorin entered beta focused on generating recommendations. Early usage showed that output quality alone was not enough.",
-          "Several consistent patterns appeared:",
+          "Early usage showed that output quality alone was not enough. Users wanted complete outfit suggestions, visible reasoning, and context from weather, schedule, and wardrobe.",
         ],
-        bullets: [
-          "Users wanted complete outfit suggestions — not more individual options.",
-          "Recommendation reasoning had to be visible at the point of decision.",
-          "Wardrobe quality mattered more than ranking — missing essentials broke downstream recommendations.",
-          "Weather, schedule, and occasion drove usefulness more than visual styling alone.",
-        ],
-        closing:
-          "These observations shifted the product from inspiration toward decision support.",
+        bullets: [],
         callout:
-          "The strongest signal from beta: users wanted faster daily decisions, not more fashion inspiration.",
+          "Users wanted faster daily decisions, not more fashion inspiration.",
       }}
-      coreInsight="Styling is not an inspiration problem — it is a decision problem."
-      coreInsightDifferentiator="Most styling apps optimize for inspiration. Duorin optimizes for decision certainty."
+      coreInsight="Styling is not an inspiration problem. It is a decision problem."
       decisionEngine={{
-        title: "From Recommendation Engine to Decision Engine",
-        tocLabel: "From Recommendation Engine to Decision Engine",
+        title: "Decision Engine",
+        tocLabel: "Decision Engine",
+        intro:
+          "Beta feedback changed the product direction. Duorin shifted from generating more recommendations to helping users make fewer, clearer decisions.",
         cards: [
           {
             label: "Before",
@@ -84,36 +83,25 @@ export default function DuorinCaseStudyPage() {
         ],
       }}
       productThinkingShift={{
-        paragraphs: [
-          "What changed was not the interface.",
-          "What changed was our understanding of the problem.",
-          "We started by assuming users wanted more outfit recommendations.",
-          "Beta feedback showed the opposite.",
-          "Users rarely asked for more options. They wanted confidence that the option in front of them was the right one.",
-          "That realization shifted Duorin from a recommendation engine into a decision engine.",
-        ],
         image: {
           src: "/Artifact3.png",
           alt: "Hand-drawn product thinking artifact showing how beta observations shifted Duorin from more recommendations to clearer decisions.",
           width: 1024,
           height: 1536,
         },
-        closing:
-          "This shift became the foundation for every major product decision that followed.",
+        caption:
+          "Beta feedback shifted Duorin from recommendation volume to decision confidence.",
       }}
       hiddenProblem={{
         paragraphs: [
-          "Better recommendations were not limited by recommendation logic.",
-          "They were limited by input quality.",
+          "Better recommendations were not limited by recommendation logic. They were limited by input quality.",
           "Before Duorin could help users decide what to wear, it first had to understand what they actually owned.",
+          "That meant transforming unstructured fashion images into structured wardrobe data the system could reason about.",
         ],
       }}
       systemsProcessLayer={{
-        title: "Building the Wardrobe Intelligence Layer",
-        paragraphs: [
-          "Before Duorin could generate trustworthy outfit recommendations, it needed reliable wardrobe data.",
-          "The challenge was transforming unstructured fashion images into structured garments the system could reason about.",
-        ],
+        title: "Building the Intelligence Layer",
+        paragraphs: [],
         steps: [
           {
             title: "Image Input",
@@ -143,7 +131,7 @@ export default function DuorinCaseStudyPage() {
           width: 1085,
           height: 1450,
           caption:
-            "Early system sketch showing how unstructured fashion images were transformed into structured wardrobe intelligence. The goal was not outfit generation first—it was creating reliable garment data that recommendation logic could trust.",
+            "Early system sketch for turning unstructured fashion images into wardrobe-ready data.",
         },
         postVisualInsight:
           "Improving garment extraction and attribute detection upstream produced larger gains than tuning recommendation logic downstream.",
@@ -159,10 +147,8 @@ export default function DuorinCaseStudyPage() {
           "From evaluating individual garments to recommending complete, context-aware outfits.",
       }}
       finalExperience={{
-        description: [
-          "The final experience combines wardrobe data, weather, calendar events, and personal preferences into a small set of outfit decisions.",
-          "Instead of asking users to browse dozens of combinations, Duorin narrows the decision to a few strong options that fit the day.",
-        ],
+        title: "Final Product",
+        description: "Three moments define the final experience.",
       }}
       productWalkthrough={{
         videos: [
@@ -170,58 +156,28 @@ export default function DuorinCaseStudyPage() {
             title: "Wardrobe Intelligence",
             src: "/wardrobe.mp4",
             caption:
-              "Unstructured fashion images are transformed into wardrobe-ready data.",
+              "Transforms raw fashion images into wardrobe-ready data.",
           },
           {
-            title: "Stylist verdict",
+            title: "Stylist Verdict",
             src: "/stylist-verdict.mp4",
-            caption: "New garments are evaluated before entering the wardrobe.",
+            caption: "Evaluates garments before they enter the wardrobe.",
           },
           {
             title: "Daily Outfit Recommendation",
             src: "/outfit-recommendation.mp4",
             caption:
-              "Calendar, weather, wardrobe, and preferences combine into a small set of outfit decisions.",
+              "Generates a few context-aware outfits for the day.",
           },
         ],
       }}
-      systemOverview={{
-        title: "How Duorin Works",
-        intro: "Duorin is a decision pipeline, not a single feature.",
-        pipelineNodes: ["Wardrobe Upload", "Stylist verdict", "Outfit Generation"],
-        sections: [
-          {
-            heading: "Wardrobe Upload",
-            bullets: [
-              "Turn fashion images into structured wardrobe data that the system can understand.",
-            ],
-          },
-          {
-            heading: "Stylist verdict",
-            bullets: [
-              "Evaluate new garments before they enter the wardrobe, helping users reduce noise and improve recommendation quality.",
-            ],
-          },
-          {
-            heading: "Outfit Generation",
-            bullets: [
-              "Combine wardrobe data, weather, calendar events, and personal preferences into daily outfit decisions.",
-            ],
-          },
-        ],
-      }}
-      impact={[
-        "Users spent less time browsing combinations.",
-        "Recommendation reasoning became easier to understand.",
-        "Wardrobe quality issues became visible earlier in the workflow.",
-        "Trust improved when recommendations explained why they appeared.",
-      ]}
+      impact={[]}
       reflection={{
-        title: "What Duorin Taught Me",
+        title: "Reflection",
         paragraphs: [
-          "The biggest lesson was that recommendation quality alone does not create trust.",
-          "Users were willing to accept imperfect recommendations when the reasoning was clear.",
-          "The project changed how I think about AI products. The challenge is rarely generating outputs. The challenge is helping users trust them enough to act.",
+          "The biggest lesson was not how to improve recommendations.",
+          "It was that users trusted explainable decisions more than perfect predictions.",
+          "That changed how I think about AI products: the hard part is not generating outputs. It is helping users trust them enough to act.",
         ],
       }}
     />

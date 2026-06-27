@@ -19,30 +19,6 @@ export const PALETTES = [
     border: "#2a2a2a",
     swatch: ["#111111", "#e8e8e6"],
   },
-  {
-    id: "vermillion",
-    bg: "#a01010",
-    fg: "#f0e8e0",
-    muted: "#d09088",
-    border: "#881010",
-    swatch: ["#a01010", "#f0e8e0"],
-  },
-  {
-    id: "amber",
-    bg: "#f2a200",
-    fg: "#6a0d69",
-    muted: "#8a5800",
-    border: "#d89000",
-    swatch: ["#f2a200", "#6a0d69"],
-  },
-  {
-    id: "marine",
-    bg: "#1843b4",
-    fg: "#fc6e0e",
-    muted: "#7090c8",
-    border: "#143898",
-    swatch: ["#1843b4", "#fc6e0e"],
-  },
 ] as const;
 
 const STORAGE_PALETTE = "palette";

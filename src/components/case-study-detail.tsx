@@ -177,6 +177,12 @@ export type CaseStudyProductEvolution = {
   narrative?: string;
 };
 
+export type CaseStudyScopeStripItem = {
+  label: string;
+  iconSrc: string;
+  iconAlt: string;
+};
+
 export type CaseStudyScreenshot = {
   src: string;
   alt: string;
@@ -301,12 +307,20 @@ export type CaseStudyDetailProps = {
     title?: string;
     paragraphs?: string[];
     bullets?: string[];
+    /** Duorin merged: impact bullets under "What changed:" */
+    whatChanged?: string[];
+    /** Duorin merged: learning paragraphs under "What I learned:" */
+    whatLearned?: string[];
     didNotWork?: string;
     improveNext?: string;
     /** When both are set, labels render on their own line above each paragraph (Duorin). */
     limitationLabel?: string;
     nextIterationLabel?: string;
   };
+  /** Duorin: merged section headings and TOC order. */
+  contentStructure?: "duorin-merged";
+  /** Compact facts shown after hero meta (e.g. team size, beta users). */
+  scopeStrip?: CaseStudyScopeStripItem[];
   inProgress?: boolean;
 };
 
@@ -372,7 +386,11 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
     impact,
     reflection,
     inProgress,
+    contentStructure,
+    scopeStrip,
   } = props;
+
+  const duorinMerged = contentStructure === "duorin-merged";
 
   const snacknuScreens = screenshotPresentation === "snacknu";
   const theyreWaitingScreens = screenshotPresentation === "theyre-waiting";
@@ -495,6 +513,27 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           )}
         </header>
 
+        {scopeStrip?.length ? (
+          <div className="case-study-scope-strip">
+            {scopeStrip.map((item) => (
+              <span key={item.label} className="case-study-scope-chip">
+                <span className="case-study-scope-chip-icon-wrap">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.iconSrc}
+                    alt={item.iconAlt}
+                    className="case-study-scope-chip-icon"
+                    width={160}
+                    height={160}
+                    draggable={false}
+                  />
+                </span>
+                <span className="case-study-scope-chip-label">{item.label}</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         {heroScreenshot ? (
           <section
             id={CASE_STUDY_SECTION_IDS.heroScreenshot}
@@ -536,11 +575,16 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
 
         {personalMotivation ? (
           <section
-            id={CASE_STUDY_SECTION_IDS.personalMotivation}
+            id={
+              duorinMerged
+                ? CASE_STUDY_SECTION_IDS.whyBuiltDuorin
+                : CASE_STUDY_SECTION_IDS.personalMotivation
+            }
             className="case-study-section case-study-section--after-hero"
           >
             <h2 className="case-study-section-heading">
-              {personalMotivation.title ?? "Personal Motivation"}
+              {personalMotivation.title ??
+                (duorinMerged ? "Why I Built Duorin" : "Personal Motivation")}
             </h2>
             {personalMotivation.paragraphs.map((paragraph) => (
               <p key={paragraph} className="case-study-prose">
@@ -550,63 +594,100 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </section>
         ) : null}
 
-        <section
-          id={CASE_STUDY_SECTION_IDS.whyThisMatters}
-          className={`case-study-section${
-            personalMotivation ? "" : " case-study-section--after-hero"
-          }`}
-        >
-          <h2 className="case-study-section-heading">Why this matters</h2>
-          {whyItMatters.map((paragraph, i) => (
-            <p key={i} className="case-study-prose">
-              {paragraph}
-            </p>
-          ))}
-        </section>
-
-        <section id={CASE_STUDY_SECTION_IDS.theProblem} className="case-study-section">
-          <h2 className="case-study-section-heading">The Problem</h2>
-          <p className="case-study-prose">{problem.intro}</p>
-          <ul className="case-study-bullets">
-            {problem.bullets.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
-        </section>
-
-        {betaLearnings ? (
-          <section id={CASE_STUDY_SECTION_IDS.betaLearnings} className="case-study-section">
-            <h2 className="case-study-section-heading">What We Learned During Beta</h2>
-            {betaLearnings.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="case-study-prose">
+        {!duorinMerged ? (
+          <section
+            id={CASE_STUDY_SECTION_IDS.whyThisMatters}
+            className={`case-study-section${
+              personalMotivation ? "" : " case-study-section--after-hero"
+            }`}
+          >
+            <h2 className="case-study-section-heading">Why this matters</h2>
+            {whyItMatters.map((paragraph, i) => (
+              <p key={i} className="case-study-prose">
                 {paragraph}
               </p>
             ))}
-            <ul className="case-study-bullets">
-              {betaLearnings.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
-              ))}
-            </ul>
-            {betaLearnings.closing ? (
-              <p className="case-study-prose case-study-prose-tight">{betaLearnings.closing}</p>
-            ) : null}
-            <div className="case-study-beta-insight">
-              <p className="case-study-prose case-study-prose-tight">{betaLearnings.callout}</p>
-            </div>
           </section>
         ) : null}
 
-        {coreInsight ? (
-          <section id={CASE_STUDY_SECTION_IDS.coreInsight} className="case-study-section">
-            <h2 className="case-study-section-heading">Core Insight</h2>
-            <p className="case-study-prose">{coreInsight}</p>
-            {coreInsightDifferentiator ? (
-              <p className="case-study-prose case-study-core-diff">
-                {coreInsightDifferentiator}
-              </p>
+        {duorinMerged ? (
+          <section id={CASE_STUDY_SECTION_IDS.turningPoint} className="case-study-section">
+            <h2 className="case-study-section-heading">The Turning Point</h2>
+            <p className="case-study-reflection-label case-study-reflection-label--block">
+              Problem:
+            </p>
+            <p className="case-study-prose">{problem.intro}</p>
+            {betaLearnings ? (
+              <>
+                <p className="case-study-reflection-label case-study-reflection-label--block case-study-reflection-label--after-body">
+                  Beta learning:
+                </p>
+                {betaLearnings.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="case-study-prose">
+                    {paragraph}
+                  </p>
+                ))}
+                <div className="case-study-beta-insight">
+                  <p className="case-study-prose case-study-prose-tight">{betaLearnings.callout}</p>
+                </div>
+              </>
+            ) : null}
+            {coreInsight ? (
+              <>
+                <p className="case-study-reflection-label case-study-reflection-label--block case-study-reflection-label--after-body">
+                  Core insight:
+                </p>
+                <p className="case-study-prose">{coreInsight}</p>
+              </>
             ) : null}
           </section>
-        ) : null}
+        ) : (
+          <>
+            <section id={CASE_STUDY_SECTION_IDS.theProblem} className="case-study-section">
+              <h2 className="case-study-section-heading">The Problem</h2>
+              <p className="case-study-prose">{problem.intro}</p>
+              <ul className="case-study-bullets">
+                {problem.bullets.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            </section>
+
+            {betaLearnings ? (
+              <section id={CASE_STUDY_SECTION_IDS.betaLearnings} className="case-study-section">
+                <h2 className="case-study-section-heading">What We Learned During Beta</h2>
+                {betaLearnings.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="case-study-prose">
+                    {paragraph}
+                  </p>
+                ))}
+                <ul className="case-study-bullets">
+                  {betaLearnings.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+                {betaLearnings.closing ? (
+                  <p className="case-study-prose case-study-prose-tight">{betaLearnings.closing}</p>
+                ) : null}
+                <div className="case-study-beta-insight">
+                  <p className="case-study-prose case-study-prose-tight">{betaLearnings.callout}</p>
+                </div>
+              </section>
+            ) : null}
+
+            {coreInsight ? (
+              <section id={CASE_STUDY_SECTION_IDS.coreInsight} className="case-study-section">
+                <h2 className="case-study-section-heading">Core Insight</h2>
+                <p className="case-study-prose">{coreInsight}</p>
+                {coreInsightDifferentiator ? (
+                  <p className="case-study-prose case-study-core-diff">
+                    {coreInsightDifferentiator}
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
+          </>
+        )}
 
         {decisionEngine ? (
           <section
@@ -644,6 +725,28 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                 </article>
               ))}
             </div>
+            {duorinMerged && productThinkingShift ? (
+              <figure className="case-study-systems-artifact case-study-systems-artifact--thinking">
+                <div className="case-study-evolution-card-frame case-study-systems-artifact-card">
+                  <div className="case-study-systems-artifact-media-wrap">
+                    <Image
+                      src={productThinkingShift.image.src}
+                      alt={productThinkingShift.image.alt}
+                      width={productThinkingShift.image.width}
+                      height={productThinkingShift.image.height}
+                      sizes="(max-width: 900px) 92vw, 240px"
+                      className="case-study-systems-artifact-image"
+                      draggable={false}
+                    />
+                  </div>
+                  {productThinkingShift.caption ? (
+                    <figcaption className="product-evolution-summary">
+                      {productThinkingShift.caption}
+                    </figcaption>
+                  ) : null}
+                </div>
+              </figure>
+            ) : null}
           </section>
         ) : null}
 
@@ -693,7 +796,7 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </section>
         ) : null}
 
-        {productThinkingShift ? (
+        {!duorinMerged && productThinkingShift ? (
           <section
             id={CASE_STUDY_SECTION_IDS.productThinkingShift}
             className="case-study-section case-study-systems-process"
@@ -734,7 +837,7 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </section>
         ) : null}
 
-        {hiddenProblem ? (
+        {!duorinMerged && hiddenProblem ? (
           <section
             id={CASE_STUDY_SECTION_IDS.hiddenProblem}
             className="case-study-section"
@@ -752,15 +855,30 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
 
         {systemsProcessLayer ? (
           <section
-            id={CASE_STUDY_SECTION_IDS.systemsProcessLayer}
+            id={
+              duorinMerged
+                ? CASE_STUDY_SECTION_IDS.intelligenceLayer
+                : CASE_STUDY_SECTION_IDS.systemsProcessLayer
+            }
             className="case-study-section case-study-systems-process"
           >
-            <h2 className="case-study-section-heading">{systemsProcessLayer.title}</h2>
-            {systemsProcessLayer.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="case-study-prose">
-                {paragraph}
-              </p>
-            ))}
+            <h2 className="case-study-section-heading">
+              {systemsProcessLayer.title}
+            </h2>
+            {duorinMerged && hiddenProblem
+              ? hiddenProblem.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="case-study-prose">
+                    {paragraph}
+                  </p>
+                ))
+              : null}
+            {!duorinMerged
+              ? systemsProcessLayer.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="case-study-prose">
+                    {paragraph}
+                  </p>
+                ))
+              : null}
             <div className="case-study-process-row">
               {systemsProcessLayer.steps.map((step, index) => (
                 <article key={step.title} className="case-study-process-step">
@@ -919,8 +1037,26 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                     />
                   </div>
                   <div className="case-study-evolution-compare-arrow" aria-hidden="true">
-                    <span className="case-study-evolution-compare-arrow-line" />
-                    <span className="case-study-evolution-compare-arrow-head">→</span>
+                    {Array.from({ length: 6 }, (_, index) => (
+                      <span key={index} className="case-study-evolution-compare-arrow-dot" />
+                    ))}
+                    <span className="case-study-evolution-compare-arrow-chevron" aria-hidden="true">
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M2 2L7 5L2 8"
+                          stroke="#000000"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
                   </div>
                   <div className="case-study-evolution-media-slot product-evolution-column">
                     <p className="case-study-evolution-card-label">After</p>
@@ -936,15 +1072,27 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </section>
         ) : null}
 
-        {finalExperience ? (
+        {duorinMerged && (finalExperience || productWalkthrough) ? (
           <section
-            id={CASE_STUDY_SECTION_IDS.finalExperience}
+            id={CASE_STUDY_SECTION_IDS.finalProduct}
             className="case-study-section case-study-final-experience"
           >
             <h2 className="case-study-section-heading">
-              {finalExperience.title ?? "Final Experience"}
+              {finalExperience?.title ?? "Final Product"}
             </h2>
-            {finalExperience.image ? (
+            {finalExperience?.description
+              ? (Array.isArray(finalExperience.description)
+                  ? finalExperience.description
+                  : [finalExperience.description]
+                )
+                  .slice(0, 1)
+                  .map((paragraph) => (
+                    <p key={paragraph} className="case-study-prose">
+                      {paragraph}
+                    </p>
+                  ))
+              : null}
+            {finalExperience?.image ? (
               <figure className="case-study-final-experience-figure">
                 <Image
                   src={finalExperience.image.src}
@@ -965,91 +1113,170 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
                 ) : null}
               </figure>
             ) : null}
-            {finalExperience.outcomeChips?.length ? (
-              <div className="case-study-final-experience-chips">
-                {finalExperience.outcomeChips.map((chip) => (
-                  <span key={chip} className="pipeline-step">
-                    {chip}
-                  </span>
+            {finalExperience?.description
+              ? (Array.isArray(finalExperience.description)
+                  ? finalExperience.description
+                  : [finalExperience.description]
+                )
+                  .slice(1)
+                  .map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="case-study-prose case-study-final-experience-closing"
+                    >
+                      {paragraph}
+                    </p>
+                  ))
+              : null}
+            {productWalkthrough ? (
+              <div className="case-study-walkthrough-list">
+                {productWalkthrough.videos.map((video) => (
+                  <article key={video.title} className="case-study-walkthrough-block">
+                    <h3 className="case-study-artifact-title">{video.title}</h3>
+                    <div className="case-study-evolution-card-frame case-study-walkthrough-card">
+                      <div className="case-study-walkthrough-media-wrap">
+                        {video.src ? (
+                          <AutoplayVideo
+                            src={video.src}
+                            className="case-study-evolution-media"
+                          />
+                        ) : (
+                          <div
+                            className="case-study-visual-placeholder case-study-walkthrough-placeholder"
+                            aria-label="Video placeholder"
+                          >
+                            <p className="case-study-visual-placeholder-kicker">Video to add</p>
+                          </div>
+                        )}
+                      </div>
+                      <p className="product-evolution-summary">{video.caption}</p>
+                    </div>
+                  </article>
                 ))}
               </div>
             ) : null}
-            {finalExperience.description ? (
-              (Array.isArray(finalExperience.description)
-                ? finalExperience.description
-                : [finalExperience.description]
-              ).map((paragraph) => (
-                <p key={paragraph} className="case-study-prose case-study-final-experience-closing">
-                  {paragraph}
-                </p>
-              ))
-            ) : null}
-            {finalExperience.whatChanged ? (
-              <div className="case-study-final-experience-changes">
-                <p className="case-study-artifact-title">What Changed</p>
-                <div className="case-study-evolution-compare">
-                  <div className="case-study-evolution-card">
-                    <p className="case-study-evolution-card-label">Before</p>
-                    <ul className="case-study-bullets case-study-bullets--dash">
-                      {finalExperience.whatChanged.before.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="case-study-evolution-card">
-                    <p className="case-study-evolution-card-label">After</p>
-                    <ul className="case-study-bullets case-study-bullets--dash">
-                      {finalExperience.whatChanged.after.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-            {finalExperience.closingParagraph ? (
-              <p className="case-study-prose case-study-final-experience-closing">
-                {finalExperience.closingParagraph}
-              </p>
-            ) : null}
           </section>
-        ) : null}
-
-        {productWalkthrough ? (
-          <section
-            id={CASE_STUDY_SECTION_IDS.productWalkthrough}
-            className="case-study-section"
-          >
-            <h2 className="case-study-section-heading">
-              {productWalkthrough.title ?? "Product Walkthrough"}
-            </h2>
-            <div className="case-study-walkthrough-list">
-              {productWalkthrough.videos.map((video) => (
-                <article key={video.title} className="case-study-walkthrough-block">
-                  <h3 className="case-study-artifact-title">{video.title}</h3>
-                  <div className="case-study-evolution-card-frame case-study-walkthrough-card">
-                    <div className="case-study-walkthrough-media-wrap">
-                      {video.src ? (
-                        <AutoplayVideo
-                          src={video.src}
-                          className="case-study-evolution-media"
-                        />
-                      ) : (
-                        <div
-                          className="case-study-visual-placeholder case-study-walkthrough-placeholder"
-                          aria-label="Video placeholder"
-                        >
-                          <p className="case-study-visual-placeholder-kicker">Video to add</p>
-                        </div>
-                      )}
+        ) : (
+          <>
+            {finalExperience ? (
+              <section
+                id={CASE_STUDY_SECTION_IDS.finalExperience}
+                className="case-study-section case-study-final-experience"
+              >
+                <h2 className="case-study-section-heading">
+                  {finalExperience.title ?? "Final Experience"}
+                </h2>
+                {finalExperience.image ? (
+                  <figure className="case-study-final-experience-figure">
+                    <Image
+                      src={finalExperience.image.src}
+                      alt={finalExperience.image.alt}
+                      width={finalExperience.image.width}
+                      height={finalExperience.image.height}
+                      sizes={finalExperience.image.sizes ?? "(max-width: 900px) 100vw, 840px"}
+                      className={
+                        finalExperience.image.imageClassName ??
+                        "case-study-final-experience-image"
+                      }
+                      draggable={false}
+                    />
+                    {finalExperience.caption ? (
+                      <figcaption className="case-study-final-experience-caption">
+                        {finalExperience.caption}
+                      </figcaption>
+                    ) : null}
+                  </figure>
+                ) : null}
+                {finalExperience.outcomeChips?.length ? (
+                  <div className="case-study-final-experience-chips">
+                    {finalExperience.outcomeChips.map((chip) => (
+                      <span key={chip} className="pipeline-step">
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {finalExperience.description ? (
+                  (Array.isArray(finalExperience.description)
+                    ? finalExperience.description
+                    : [finalExperience.description]
+                  ).map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="case-study-prose case-study-final-experience-closing"
+                    >
+                      {paragraph}
+                    </p>
+                  ))
+                ) : null}
+                {finalExperience.whatChanged ? (
+                  <div className="case-study-final-experience-changes">
+                    <p className="case-study-artifact-title">What Changed</p>
+                    <div className="case-study-evolution-compare">
+                      <div className="case-study-evolution-card">
+                        <p className="case-study-evolution-card-label">Before</p>
+                        <ul className="case-study-bullets case-study-bullets--dash">
+                          {finalExperience.whatChanged.before.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="case-study-evolution-card">
+                        <p className="case-study-evolution-card-label">After</p>
+                        <ul className="case-study-bullets case-study-bullets--dash">
+                          {finalExperience.whatChanged.after.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                    <p className="product-evolution-summary">{video.caption}</p>
                   </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
+                ) : null}
+                {finalExperience.closingParagraph ? (
+                  <p className="case-study-prose case-study-final-experience-closing">
+                    {finalExperience.closingParagraph}
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
+
+            {productWalkthrough ? (
+              <section
+                id={CASE_STUDY_SECTION_IDS.productWalkthrough}
+                className="case-study-section"
+              >
+                <h2 className="case-study-section-heading">
+                  {productWalkthrough.title ?? "Product Walkthrough"}
+                </h2>
+                <div className="case-study-walkthrough-list">
+                  {productWalkthrough.videos.map((video) => (
+                    <article key={video.title} className="case-study-walkthrough-block">
+                      <h3 className="case-study-artifact-title">{video.title}</h3>
+                      <div className="case-study-evolution-card-frame case-study-walkthrough-card">
+                        <div className="case-study-walkthrough-media-wrap">
+                          {video.src ? (
+                            <AutoplayVideo
+                              src={video.src}
+                              className="case-study-evolution-media"
+                            />
+                          ) : (
+                            <div
+                              className="case-study-visual-placeholder case-study-walkthrough-placeholder"
+                              aria-label="Video placeholder"
+                            >
+                              <p className="case-study-visual-placeholder-kicker">Video to add</p>
+                            </div>
+                          )}
+                        </div>
+                        <p className="product-evolution-summary">{video.caption}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </>
+        )}
 
         {systemOverview ? (
           <section
@@ -1349,14 +1576,16 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           </section>
         ) : null}
 
-        <section id={CASE_STUDY_SECTION_IDS.impact} className="case-study-section">
-          <h2 className="case-study-section-heading">Impact</h2>
-          <ul className="case-study-bullets">
-            {impact.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
+        {!duorinMerged ? (
+          <section id={CASE_STUDY_SECTION_IDS.impact} className="case-study-section">
+            <h2 className="case-study-section-heading">Impact</h2>
+            <ul className="case-study-bullets">
+              {impact.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {postImpactScreenshot ? (
           <section
@@ -1397,42 +1626,68 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
           <h2 className="case-study-section-heading">
             {reflection.title ?? "Reflection"}
           </h2>
-          {reflection.paragraphs?.length ? (
-            reflection.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="case-study-prose">
-                {paragraph}
-              </p>
-            ))
-          ) : reflection.bullets?.length ? (
-            <ul className="case-study-bullets">
-              {reflection.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
-              ))}
-            </ul>
-          ) : reflection.limitationLabel !== undefined &&
-            reflection.nextIterationLabel !== undefined ? (
+          {reflection.whatChanged?.length ? (
             <>
               <p className="case-study-reflection-label case-study-reflection-label--block">
-                {reflection.limitationLabel}
+                What changed:
               </p>
-              <p className="case-study-prose">{reflection.didNotWork}</p>
-              <p className="case-study-reflection-label case-study-reflection-label--block case-study-reflection-label--after-body">
-                {reflection.nextIterationLabel}
-              </p>
-              <p className="case-study-prose case-study-prose-tight">{reflection.improveNext}</p>
+              <ul className="case-study-bullets">
+                {reflection.whatChanged.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
             </>
-          ) : (
+          ) : null}
+          {reflection.whatLearned?.length ? (
             <>
-              <p className="case-study-prose">
-                <span className="case-study-reflection-label">What did not work: </span>
-                {reflection.didNotWork}
+              <p className="case-study-reflection-label case-study-reflection-label--block case-study-reflection-label--after-body">
+                What I learned:
               </p>
-              <p className="case-study-prose case-study-prose-tight">
-                <span className="case-study-reflection-label">What I would improve next: </span>
-                {reflection.improveNext}
-              </p>
+              {reflection.whatLearned.map((paragraph) => (
+                <p key={paragraph} className="case-study-prose">
+                  {paragraph}
+                </p>
+              ))}
             </>
-          )}
+          ) : null}
+          {!reflection.whatChanged?.length && !reflection.whatLearned?.length ? (
+            reflection.paragraphs?.length ? (
+              reflection.paragraphs.map((paragraph) => (
+                <p key={paragraph} className="case-study-prose">
+                  {paragraph}
+                </p>
+              ))
+            ) : reflection.bullets?.length ? (
+              <ul className="case-study-bullets">
+                {reflection.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
+              </ul>
+            ) : reflection.limitationLabel !== undefined &&
+              reflection.nextIterationLabel !== undefined ? (
+              <>
+                <p className="case-study-reflection-label case-study-reflection-label--block">
+                  {reflection.limitationLabel}
+                </p>
+                <p className="case-study-prose">{reflection.didNotWork}</p>
+                <p className="case-study-reflection-label case-study-reflection-label--block case-study-reflection-label--after-body">
+                  {reflection.nextIterationLabel}
+                </p>
+                <p className="case-study-prose case-study-prose-tight">{reflection.improveNext}</p>
+              </>
+            ) : (
+              <>
+                <p className="case-study-prose">
+                  <span className="case-study-reflection-label">What did not work: </span>
+                  {reflection.didNotWork}
+                </p>
+                <p className="case-study-prose case-study-prose-tight">
+                  <span className="case-study-reflection-label">What I would improve next: </span>
+                  {reflection.improveNext}
+                </p>
+              </>
+            )
+          ) : null}
         </section>
       </div>
     </div>
