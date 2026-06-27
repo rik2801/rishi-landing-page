@@ -509,12 +509,13 @@ picture {
    ———————————————————————————————— */
 
 .case-studies-page {
+  --case-studies-home-nudge: calc(72px * 0.2);
   padding-top: 72px;
   padding-bottom: 80px;
 }
 
 .case-studies-home-line {
-  margin: 0;
+  margin: var(--case-studies-home-nudge) 0 0;
 }
 
 .case-studies-home-link {
@@ -529,7 +530,7 @@ picture {
   display: grid;
   gap: 1.75rem 2.25rem;
   align-items: center;
-  margin-top: -1.55rem;
+  margin-top: calc(-1.55rem - var(--case-studies-home-nudge, 0px));
 }
 
 .case-studies-hero-copy {
@@ -2956,8 +2957,13 @@ video.case-study-evolution-media {
   }
 
   .case-studies-page {
+    --case-studies-home-nudge: calc(56px * 0.2);
     padding-top: 56px;
     padding-bottom: 60px;
+  }
+
+  .case-studies-home-line {
+    margin-top: var(--case-studies-home-nudge);
   }
 
   .case-study-meta-grid.case-study-meta-grid--bordered {

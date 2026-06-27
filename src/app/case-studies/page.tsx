@@ -65,7 +65,7 @@ export default function CaseStudiesIndexPage() {
               marketplaces, and civic systems.
             </p>
             <p className="case-studies-positioning">
-              I design AI and systems-heavy products where UX depends on logic, data, and trust — not just
+              I design AI and systems-heavy products where UX depends on logic, data, and trust, not just
               screens.
             </p>
           </div>
