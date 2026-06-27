@@ -49,12 +49,33 @@ const STORAGE_PALETTE = "palette";
 const STORAGE_CUSTOM = "paletteCustom";
 export const CUSTOM_PALETTE_ID = "custom" as const;
 
+export function productEvolutionCardTextColor(bg: string): string {
+  const hex = bg.replace(/^#/, "").toLowerCase();
+  const expanded =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex;
+  if (expanded === "ffffff") return "#111111";
+  return bg.startsWith("#") ? bg : `#${bg}`;
+}
+
+function applyProductEvolutionCardText(bg: string) {
+  document.documentElement.style.setProperty(
+    "--product-evolution-card-text",
+    productEvolutionCardTextColor(bg),
+  );
+}
+
 function applyColors(bg: string, fg: string) {
   const s = document.documentElement.style;
   s.setProperty("--bg", bg);
   s.setProperty("--fg", fg);
   s.setProperty("--fg-muted", fg + "80");
   s.setProperty("--border-color", fg + "20");
+  applyProductEvolutionCardText(bg);
 }
 
 function applyPalette(id: string) {
@@ -64,6 +85,7 @@ function applyPalette(id: string) {
   s.setProperty("--fg", palette.fg);
   s.setProperty("--fg-muted", palette.muted);
   s.setProperty("--border-color", palette.border);
+  applyProductEvolutionCardText(palette.bg);
 }
 
 /** Ring around editable swatches: black on light BG, white on dark BG (e.g. black). */
