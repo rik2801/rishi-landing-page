@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   description:
     "Product designer and builder focused on turning complex systems into usable decisions.",
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
-    apple: [{ url: "/favicon.png", type: "image/png" }],
+    icon: [{ url: "/rik.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/rik.png", type: "image/png" }],
   },
 };
 
