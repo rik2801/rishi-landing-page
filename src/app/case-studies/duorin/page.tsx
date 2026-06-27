@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CaseStudyDetail } from "@/components/case-study-detail";
 
 export const metadata: Metadata = {
-  title: "Duorin — Case Study — Rishi Kiran",
+  title: "Duorin, Case Study, Rishi Kiran",
   description:
     "An AI styling assistant that turns wardrobe, weather, calendar, and preference signals into daily outfit decisions users can trust.",
 };
@@ -11,6 +11,7 @@ export default function DuorinCaseStudyPage() {
   return (
     <CaseStudyDetail
       contentStructure="duorin-merged"
+      sectionHeadingGlyph
       name="Duorin"
       titleHref="https://www.duorin.com"
       titleSiteBracket="https://www.duorin.com"
@@ -33,75 +34,82 @@ export default function DuorinCaseStudyPage() {
         },
       ]}
       personalMotivation={{
-        title: "Why I Built Duorin",
+        title: "Why Duorin Exists",
         paragraphs: [
-          "Most styling apps optimize for inspiration rather than decisions.",
-          "They generate endless outfit combinations, but rarely answer the one question users actually have:",
-          "\u201cWhat should I wear today?\u201d",
-          "Duorin was built to explore whether AI could reduce decision fatigue instead of generating more inspiration.",
+          "Most styling products treat fashion as an inspiration problem. They generate endless outfit ideas, yet rarely answer the one question people have before leaving home: \"What should I wear today?\"",
+          "Duorin takes a different approach, combining wardrobe, weather, calendar, preferences, and styling intelligence into one daily decision instead of more inspiration.",
         ],
       }}
       whyItMatters={[]}
-      problem={{
-        intro:
-          "Most styling apps optimize for option volume, not decision quality. Recommendations can look good but still fail when users cannot understand why they appeared or how they fit the day.",
-        bullets: [],
-      }}
-      betaLearnings={{
+      problem={{ intro: "", bullets: [] }}
+      productBet={{
+        title: "The Product Bet",
+        tocLabel: "The Product Bet",
         paragraphs: [
-          "Early usage showed that output quality alone was not enough. Users wanted complete outfit suggestions, visible reasoning, and context from weather, schedule, and wardrobe.",
+          "A useful AI stylist needs more than image generation. It has to understand the user's wardrobe, personal style, daily context, and the situations they dress for. Duorin was built on one principle: better context creates better decisions.",
         ],
-        bullets: [],
-        callout:
-          "Users wanted faster daily decisions, not more fashion inspiration.",
+        callout: "Context matters more than more recommendations.",
+        calloutHighlight: "Context",
       }}
-      coreInsight="Styling is not an inspiration problem. It is a decision problem."
-      decisionEngine={{
-        title: "Decision Engine",
-        tocLabel: "Decision Engine",
+      signals={{
+        title: "What Duorin Understands",
+        tocLabel: "What Duorin Understands",
         intro:
-          "Beta feedback changed the product direction. Duorin shifted from generating more recommendations to helping users make fewer, clearer decisions.",
+          "Before making a recommendation, Duorin combines multiple signals about the user and their day.",
         cards: [
           {
-            label: "Before",
-            bullets: [
-              "More recommendations",
-              "Hidden reasoning",
-              "Item-focused decisions",
-              "Inspiration-first experience",
-            ],
+            label: "Wardrobe",
+            body: "Everything the user already owns.",
+            iconSrc: "/icons/wardrobe.webp",
+            iconAlt: "Wardrobe icon",
           },
           {
-            label: "After",
-            bullets: [
-              "Fewer strong recommendations",
-              "Visible reasoning",
-              "Complete outfit decisions",
-              "Confidence-first experience",
-            ],
+            label: "Weather",
+            body: "What is appropriate today.",
+            iconSrc: "/icons/weather.webp",
+            iconAlt: "Weather icon",
+          },
+          {
+            label: "Calendar",
+            body: "Where the user is going.",
+            iconSrc: "/icons/calendar.webp",
+            iconAlt: "Calendar icon",
+            labelFootnote: { href: "#privacy", ariaLabel: "Privacy by Design" },
+          },
+          {
+            label: "Preferences",
+            body: "Personal taste and style.",
+            iconSrc: "/icons/designed-and-built.webp",
+            iconAlt: "Preferences icon",
+          },
+          {
+            label: "Body Signals",
+            body: "Fit, silhouette and undertones.",
+            iconSrc: "/icons/body-signals.webp",
+            iconAlt: "Body signals icon",
+          },
+          {
+            label: "Styling Knowledge",
+            body: "Fashion rules, garment compatibility and colour theory.",
+            iconSrc: "/icons/styling-knowledge.webp",
+            iconAlt: "Styling knowledge icon",
           },
         ],
       }}
-      productThinkingShift={{
-        image: {
-          src: "/Artifact3.png",
-          alt: "Hand-drawn product thinking artifact showing how beta observations shifted Duorin from more recommendations to clearer decisions.",
-          width: 1024,
-          height: 1536,
-        },
-        caption:
-          "Beta feedback shifted Duorin from recommendation volume to decision confidence.",
-      }}
-      hiddenProblem={{
+      privacyContext={{
+        title: "Privacy by Design",
+        tocLabel: "Privacy by Design",
         paragraphs: [
-          "Better recommendations were not limited by recommendation logic. They were limited by input quality.",
-          "Before Duorin could help users decide what to wear, it first had to understand what they actually owned.",
-          "That meant transforming unstructured fashion images into structured wardrobe data the system could reason about.",
+          "Duorin uses calendar context to improve outfit recommendations without relying on raw personal data.",
+          "Calendar events are interpreted on-device into simple context signals such as occasion, timing, and formality. Only those signals are used to personalize recommendations, keeping personal event details private.",
+          "This keeps recommendations personal without exposing users' calendar information.",
         ],
       }}
       systemsProcessLayer={{
-        title: "Building the Intelligence Layer",
-        paragraphs: [],
+        title: "Building the Wardrobe Intelligence Layer",
+        paragraphs: [
+          "Before Duorin could reason about weather, calendar, or taste, it needed a clear picture of what the user already owned. That meant turning messy fashion images into structured garment data the system could work with.",
+        ],
         steps: [
           {
             title: "Image Input",
@@ -123,18 +131,14 @@ export default function DuorinCaseStudyPage() {
               "The structured item becomes usable for matching, gap detection, and outfit generation.",
           },
         ],
-        insight:
-          "The pipeline turned raw images into structured garments before any outfit logic ran.",
         artifact: {
           src: "/Artifact1.png",
           alt: "Hand-drawn notebook sketch of image cleaning and wardrobe analysis pipeline from inspiration image to structured garment data",
           width: 1085,
           height: 1450,
           caption:
-            "Early system sketch for turning unstructured fashion images into wardrobe-ready data.",
+            "Early system sketch exploring how unstructured fashion images become structured wardrobe intelligence.",
         },
-        postVisualInsight:
-          "Improving garment extraction and attribute detection upstream produced larger gains than tuning recommendation logic downstream.",
       }}
       productEvolution={{
         oldImageSrc: "/old-scan.jpg",

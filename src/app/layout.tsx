@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
+import { MediaGuard } from "@/components/media-guard";
 import "./globals.css";
 
 const apercu = localFont({
@@ -56,7 +57,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: paletteScript }}
         />
       </head>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <MediaGuard />
+        {children}
+      </body>
     </html>
   );
 }

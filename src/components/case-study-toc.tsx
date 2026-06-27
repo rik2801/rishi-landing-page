@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CaseStudyTocItem } from "@/lib/case-study-sections";
 
 type CaseStudyTOCProps = {
@@ -46,6 +47,7 @@ function indexForId(items: CaseStudyTocItem[], id: string): number {
 }
 
 export function CaseStudyTOC({ items }: CaseStudyTOCProps) {
+  const [mounted, setMounted] = useState(false);
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const itemsRef = useRef(items);
   const isClickScrolling = useRef(false);
@@ -179,6 +181,10 @@ export function CaseStudyTOC({ items }: CaseStudyTOCProps) {
   );
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!items.length) return;
 
     lastScrollYRef.current = window.scrollY;
@@ -238,9 +244,9 @@ export function CaseStudyTOC({ items }: CaseStudyTOCProps) {
     };
   }, [items, syncScrollTarget, handleScroll, clearScrollLock, setActiveImmediate, enqueueToTarget, getStepInterval]);
 
-  if (!items.length) return null;
+  if (!items.length || !mounted) return null;
 
-  return (
+  return createPortal(
     <nav className="case-study-toc" aria-label="Case study sections">
       <div className="case-study-toc-shell">
         <ol className="case-study-toc-list">
@@ -265,6 +271,7 @@ export function CaseStudyTOC({ items }: CaseStudyTOCProps) {
           })}
         </ol>
       </div>
-    </nav>
+    </nav>,
+    document.body,
   );
 }
