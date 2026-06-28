@@ -1,8 +1,9 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useAnimations, useGLTF } from "@react-three/drei";
+import { ContactShadows, useAnimations, useGLTF } from "@react-three/drei";
 import { useRouter } from "next/navigation";
+import { markCinematicEnter } from "@/components/portfolio-transition";
 import {
   Suspense,
   useCallback,
@@ -23,7 +24,10 @@ const INITIAL_PAUSE_MAX_MS = 500;
 const IDLE_NUDGE_1_MS = 10_000;
 const IDLE_NUDGE_2_MS = 15_000;
 const RECOMMENDATION_MS = 15_000;
-const EXIT_FADE_MS = 900;
+const CINEMATIC_MS = 750;
+const ENTRY_FADE_MS = 750;
+const EXIT_FADE_MS = CINEMATIC_MS;
+const ANIM_CROSSFADE_S = 0.5;
 const CONFIRM_IDLE_WAIT_MS = 1500;
 const CONFIRM_FALLBACK_MS = 4000;
 const CONFIRM_FADE_AT = 0.9;
@@ -51,7 +55,7 @@ const GREETING_SEQUENCES = [
 
 const ALL_VIEWED_DIALOGUE = [
   "You've seen everything.",
-  "Thanks for taking the tour.",
+  "Thanks for taking the tour. Pick one anytime if you'd like to revisit.",
 ] as const;
 
 const DUORIN_HREF = "/case-studies/duorin";
@@ -330,13 +334,7 @@ function pickReturnDialogue(lastViewedHref: string) {
   }
 
   const caseStudyName = getCaseStudyLabel(lastViewedHref);
-  const options = [
-    [`How was ${caseStudyName}?`],
-    ["Back for another one?"],
-    ["Ready to explore something else?"],
-  ] as const;
-
-  return [...options[Math.floor(Math.random() * options.length)]];
+  return [`How was ${caseStudyName}?`, "Ready to explore something else?"];
 }
 
 function readAudioMuted() {
@@ -501,8 +499,8 @@ function playAnimation(
     if (activeRef.current.isRunning()) return resolved;
   }
 
-  activeRef.current?.fadeOut(0.35);
-  next.reset().fadeIn(0.35).play();
+  activeRef.current?.fadeOut(ANIM_CROSSFADE_S);
+  next.reset().fadeIn(ANIM_CROSSFADE_S).play();
   next.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
   next.clampWhenFinished = !loop;
   activeRef.current = next;
@@ -723,6 +721,16 @@ function Character({
   return (
     <group ref={groupRef} scale={WALK_START.scale} position={[0, WALK_START.y, WALK_START.z]}>
       <primitive object={gltf.scene} rotation={[0, 0, 0]} />
+      <ContactShadows
+        position={[0, WALK_END.y + 0.02, WALK_END.z]}
+        opacity={0.22}
+        scale={2.8}
+        blur={2.2}
+        far={1.6}
+        color="#000000"
+        frames={Infinity}
+        resolution={256}
+      />
     </group>
   );
 }
@@ -749,6 +757,7 @@ export default function ExplorePage() {
   const [flowKey, setFlowKey] = useState(0);
   const [audioMuted, setAudioMuted] = useState(false);
   const [highlightDuorin, setHighlightDuorin] = useState(false);
+  const [cinematicOut, setCinematicOut] = useState(false);
 
   const fullDialogueRef = useRef("");
   const typewriterIntervalRef = useRef<number | null>(null);
@@ -782,6 +791,16 @@ export default function ExplorePage() {
 
   useEffect(() => {
     setAudioMuted(readAudioMuted());
+
+    [SOUNDS.footstep, SOUNDS.tick, SOUNDS.select].forEach((src) => {
+      try {
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.load();
+      } catch {
+        /* ignore missing assets */
+      }
+    });
   }, []);
 
   const startFootsteps = useCallback(() => {
@@ -796,7 +815,7 @@ export default function ExplorePage() {
 
     footstepAudioRef.current = playSound(SOUNDS.footstep, {
       loop: true,
-      volume: 0.35,
+      volume: 0.16,
       muted: audioMuted,
     });
   }, [audioMuted]);
@@ -1132,6 +1151,7 @@ export default function ExplorePage() {
     setActionsReady(false);
     setFadeDone(false);
     setHighlightDuorin(false);
+    setCinematicOut(false);
     setActiveAnim(ANIM.walk);
     setActiveAnimLoop(true);
     setCurrentAnimation(ANIM.walk);
@@ -1142,7 +1162,7 @@ export default function ExplorePage() {
     const memory = readIntroMemory();
     setLastViewedHref(memory.lastViewedHref);
 
-    const timer = window.setTimeout(() => setFadeDone(true), 950);
+    const timer = window.setTimeout(() => setFadeDone(true), ENTRY_FADE_MS);
     return () => window.clearTimeout(timer);
   }, [flowKey]);
 
@@ -1235,10 +1255,12 @@ export default function ExplorePage() {
     const href = pendingRouteRef.current;
     if (!href) return;
 
+    setCinematicOut(true);
     setExitFade(true);
     setPhase("exiting");
 
     window.setTimeout(() => {
+      markCinematicEnter();
       pendingRouteRef.current = null;
       router.push(href);
     }, EXIT_FADE_MS);
@@ -1271,7 +1293,7 @@ export default function ExplorePage() {
 
     resetIdleBehavior();
     unlockAudio();
-    playSound(SOUNDS.select, { volume: 0.45, muted: audioMuted });
+    playSound(SOUNDS.select, { volume: 0.16, muted: audioMuted });
     setShowChoices(false);
     setSelectedStudy(study);
     beginPreviewDialogue(study);
@@ -1317,6 +1339,7 @@ export default function ExplorePage() {
   );
 
   const overlayHidden = fadeOut && !exitFade;
+  const cinematicFadeOut = cinematicOut || phase === "exiting";
   const showDialogueBox = displayedDialogue.length > 0 || isTyping;
 
   return (
@@ -1363,20 +1386,16 @@ export default function ExplorePage() {
         )}
       </button>
 
-      <div className="character-intro-debug" aria-hidden="true">
-        <p>phase: {phase}</p>
-        <p>animation: {currentAnimation}</p>
-      </div>
-
       <div
         className={`character-intro-canvas-wrap${
           phase === "fade-in" ? " character-intro-canvas-wrap--hidden" : ""
-        }`}
+        }${cinematicFadeOut ? " character-intro-canvas-wrap--cinematic-out" : ""}`}
         aria-hidden={phase === "fade-in"}
       >
         <Canvas camera={{ position: [0, 1.4, 5], fov: 35 }}>
-          <ambientLight intensity={1.5} />
-          <directionalLight position={[3, 4, 5]} intensity={2} />
+          <ambientLight intensity={1.15} />
+          <directionalLight position={[3, 4, 5]} intensity={1.45} />
+          <directionalLight position={[-2, 2, 3]} intensity={0.35} />
 
           <Suspense fallback={null}>
             <Character
@@ -1395,11 +1414,15 @@ export default function ExplorePage() {
       </div>
 
       <div
-        className={`character-intro-fade${overlayHidden ? " character-intro-fade--out" : ""}`}
+        className={`character-intro-fade${
+          overlayHidden ? " character-intro-fade--out" : ""
+        }${exitFade ? " character-intro-fade--exit" : ""}`}
         aria-hidden="true"
       />
 
-      <div className="character-intro-ui">
+      <div
+        className={`character-intro-ui${cinematicFadeOut ? " character-intro-ui--cinematic-out" : ""}`}
+      >
         <div className="character-intro-ui-stack">
           {showDialogueBox ? (
             <div className="character-dialogue-box" role="status" aria-live="polite">
@@ -1448,7 +1471,7 @@ export default function ExplorePage() {
                   onClick={() => handleCaseStudySelect(study)}
                   onMouseEnter={() => {
                     handleChoiceInteraction();
-                    playSound(SOUNDS.tick, { volume: 0.35, muted: audioMuted });
+                    playSound(SOUNDS.tick, { volume: 0.12, muted: audioMuted });
                   }}
                   disabled={isRouting}
                 >

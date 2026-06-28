@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { MediaGuard } from "@/components/media-guard";
+import { PortfolioTransition } from "@/components/portfolio-transition";
 import "./globals.css";
 
 const apercu = localFont({
@@ -39,6 +40,8 @@ export const metadata: Metadata = {
 
 const paletteScript = `(function(){try{function peCardText(b){var h=b.replace(/^#/,'').toLowerCase();if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return h==='ffffff'?'#111111':b}var id=localStorage.getItem('palette')||'default';var s=document.documentElement.style;if(id==='custom'){var pc=localStorage.getItem('paletteCustom');if(pc){try{var o=JSON.parse(pc);if(o.bg&&o.fg){s.setProperty('--bg',o.bg);s.setProperty('--fg',o.fg);s.setProperty('--fg-muted',o.fg+'80');s.setProperty('--border-color',o.fg+'20');s.setProperty('--product-evolution-card-text',peCardText(o.bg));return}}catch(e){}}}var p={default:{b:'#ffffff',f:'#000000',m:'#6b6b6b',r:'#e0e0e0'},midnight:{b:'#111111',f:'#e8e8e6',m:'#8a8a8a',r:'#2a2a2a'}};if(!p[id]){id='default';try{localStorage.setItem('palette','default')}catch(e){}}var t=p[id];if(t){s.setProperty('--bg',t.b);s.setProperty('--fg',t.f);s.setProperty('--fg-muted',t.m);s.setProperty('--border-color',t.r);s.setProperty('--product-evolution-card-text',peCardText(t.b))}}catch(e){}})()`;
 
+const cinematicEnterScript = `(function(){try{if(sessionStorage.getItem('rik_cinematicEnter')==='1'){document.documentElement.classList.add('portfolio-cinematic-enter')}}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,9 +59,15 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: paletteScript }}
         />
+        <Script
+          id="cinematic-enter-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: cinematicEnterScript }}
+        />
       </head>
       <body className="font-sans antialiased">
         <MediaGuard />
+        <PortfolioTransition />
         {children}
       </body>
     </html>

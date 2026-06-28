@@ -3105,6 +3105,11 @@ video.case-study-evolution-media {
   position: absolute;
   inset: 0;
   z-index: 2;
+  transition: opacity 0.55s ease;
+}
+
+.character-intro-canvas-wrap--cinematic-out {
+  opacity: 0;
 }
 
 .character-intro-canvas-wrap--hidden {
@@ -3124,12 +3129,18 @@ video.case-study-evolution-media {
   background: #ffffff;
   opacity: 1;
   pointer-events: auto;
-  transition: opacity 0.9s ease;
+  transition: opacity 0.75s ease;
 }
 
 .character-intro-fade--out {
   opacity: 0;
   pointer-events: none;
+}
+
+.character-intro-fade--exit {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.55s ease;
 }
 
 .character-intro-ui {
@@ -3147,6 +3158,11 @@ video.case-study-evolution-media {
     max(1rem, env(safe-area-inset-left));
   align-items: center;
   pointer-events: none;
+  transition: opacity 0.55s ease;
+}
+
+.character-intro-ui--cinematic-out {
+  opacity: 0;
 }
 
 .character-intro-ui-stack {
@@ -3369,4 +3385,20 @@ video.case-study-evolution-media {
     padding: 0.75rem 0.9rem;
     font-size: clamp(14px, 3.8vw, 16px);
   }
+}
+
+/* Cinematic page transitions (explore ↔ case studies) */
+html.portfolio-cinematic-enter::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #ffffff;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 750ms ease;
+}
+
+html.portfolio-cinematic-enter.portfolio-cinematic-enter--revealing::before {
+  opacity: 0;
 }
