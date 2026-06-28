@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { markCinematicEnter } from "@/components/portfolio-transition";
+import { useSiteColors } from "@/hooks/use-site-colors";
 import {
   Suspense,
   useCallback,
@@ -239,6 +240,12 @@ const FLOOR_GRID_GEOMETRY = createUniformGridGeometry();
 const GRID_LINE_OPACITY = 0.78;
 /** Exponential fog — smooth far-end fade with no hard cutoff line. */
 const GRID_FOG_DENSITY = 0.024;
+
+function themeGridLineColor(bg: string, fg: string): string {
+  const bgColor = new THREE.Color(bg);
+  const fgColor = new THREE.Color(fg);
+  return `#${bgColor.lerp(fgColor, 0.22).getHexString()}`;
+}
 const SHADOW_PLANE_OPACITY = 0.055;
 /** Return jump only — deep in scene, ~20% closer than initial wide framing; other anims stay at WALK_END. */
 const JUMP_RETURN_START = { scale: 1.08, y: -1.8, z: -1.8 };
@@ -551,7 +558,13 @@ function isTalkPhase(phase: IntroPhase) {
   return phase === "talking" || phase === "preview";
 }
 
-function WalkFloorGrid({ phase }: { phase: IntroPhase }) {
+function WalkFloorGrid({
+  phase,
+  gridLineColor,
+}: {
+  phase: IntroPhase;
+  gridLineColor: string;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const scrollZ = useRef(0);
   const prevPhase = useRef<IntroPhase>(phase);
@@ -578,7 +591,7 @@ function WalkFloorGrid({ phase }: { phase: IntroPhase }) {
   return (
     <group ref={groupRef} position={[0, FLOOR_GRID_Y, 0]}>
       <lineSegments geometry={FLOOR_GRID_GEOMETRY} frustumCulled={false}>
-        <lineBasicMaterial color="#c0c0c0" transparent opacity={GRID_LINE_OPACITY} fog />
+        <lineBasicMaterial color={gridLineColor} transparent opacity={GRID_LINE_OPACITY} fog />
       </lineSegments>
 
       <mesh
@@ -810,6 +823,11 @@ useGLTF.preload(MODEL_PATH);
 
 export default function ExplorePage() {
   const router = useRouter();
+  const siteColors = useSiteColors();
+  const gridLineColor = useMemo(
+    () => themeGridLineColor(siteColors.bg, siteColors.fg),
+    [siteColors.bg, siteColors.fg],
+  );
   const [lastViewedHref, setLastViewedHref] = useState<string | null>(null);
   const [phase, setPhase] = useState<IntroPhase>("fade-in");
   const [fadeOut, setFadeOut] = useState(false);
@@ -1463,8 +1481,8 @@ export default function ExplorePage() {
         aria-hidden={phase === "fade-in"}
       >
         <Canvas shadows camera={{ position: [0, 1.4, 5], fov: 35 }}>
-          <color attach="background" args={["#ffffff"]} />
-          <fogExp2 attach="fog" args={["#ffffff", GRID_FOG_DENSITY]} />
+          <color attach="background" args={[siteColors.bg]} />
+          <fogExp2 attach="fog" args={[siteColors.bg, GRID_FOG_DENSITY]} />
 
           <ambientLight intensity={1.05} />
           <directionalLight
@@ -1484,7 +1502,7 @@ export default function ExplorePage() {
           />
           <directionalLight position={[-2, 2, 3]} intensity={0.28} />
 
-          <WalkFloorGrid phase={phase} />
+          <WalkFloorGrid phase={phase} gridLineColor={gridLineColor} />
 
           <Suspense fallback={null}>
             <Character
