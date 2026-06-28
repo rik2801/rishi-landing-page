@@ -3010,20 +3010,6 @@ video.case-study-evolution-media {
   color: var(--fg);
 }
 
-.character-intro-floor-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 1px, transparent 1px);
-  background-size: 120px 120px;
-  background-position: center bottom;
-  opacity: 0.18;
-  mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.35) 28%, black 55%);
-}
-
 .character-intro-audio-toggle {
   position: fixed;
   top: max(14px, env(safe-area-inset-top));

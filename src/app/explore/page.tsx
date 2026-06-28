@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, useAnimations, useGLTF } from "@react-three/drei";
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { markCinematicEnter } from "@/components/portfolio-transition";
 import {
@@ -211,6 +211,35 @@ function recordReturnEntryUse() {
 const WALK_DURATION = 2.8;
 const WALK_START = { scale: 0.72, y: -1.8, z: 4.2 };
 const WALK_END = { scale: 1.7, y: -1.8, z: 0 };
+/** Floor grid sits just under the character's feet in world space. */
+const FLOOR_GRID_Y = WALK_END.y + 0.08;
+/** Uniform square cell spacing on the floor grid (world units). */
+const GRID_CELL_SIZE = 2;
+/** Lines each side of center — extends well past the fog fade. */
+const GRID_HALF_COUNT = 70;
+/** Grid scroll speed during intro walk — matches character travel for a road-like pass. */
+const WALK_GRID_SCROLL_SPEED = (WALK_START.z - WALK_END.z) / WALK_DURATION;
+
+function createUniformGridGeometry() {
+  const positions: number[] = [];
+  const extent = GRID_HALF_COUNT * GRID_CELL_SIZE;
+
+  for (let i = -GRID_HALF_COUNT; i <= GRID_HALF_COUNT; i += 1) {
+    const offset = i * GRID_CELL_SIZE;
+    positions.push(-extent, 0, offset, extent, 0, offset);
+    positions.push(offset, 0, -extent, offset, 0, extent);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  return geometry;
+}
+
+const FLOOR_GRID_GEOMETRY = createUniformGridGeometry();
+const GRID_LINE_OPACITY = 0.78;
+/** Exponential fog — smooth far-end fade with no hard cutoff line. */
+const GRID_FOG_DENSITY = 0.024;
+const SHADOW_PLANE_OPACITY = 0.055;
 /** Return jump only — deep in scene, ~20% closer than initial wide framing; other anims stay at WALK_END. */
 const JUMP_RETURN_START = { scale: 1.08, y: -1.8, z: -1.8 };
 
@@ -522,6 +551,49 @@ function isTalkPhase(phase: IntroPhase) {
   return phase === "talking" || phase === "preview";
 }
 
+function WalkFloorGrid({ phase }: { phase: IntroPhase }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const scrollZ = useRef(0);
+  const prevPhase = useRef<IntroPhase>(phase);
+
+  useFrame((_, delta) => {
+    const group = groupRef.current;
+    if (!group) return;
+
+    if (phase === "walking") {
+      if (prevPhase.current !== "walking") {
+        scrollZ.current = 0;
+      }
+
+      scrollZ.current -= WALK_GRID_SCROLL_SPEED * Math.min(delta, 0.05);
+      group.position.set(0, FLOOR_GRID_Y, scrollZ.current);
+    } else if (prevPhase.current === "walking") {
+      scrollZ.current = 0;
+      group.position.set(0, FLOOR_GRID_Y, 0);
+    }
+
+    prevPhase.current = phase;
+  });
+
+  return (
+    <group ref={groupRef} position={[0, FLOOR_GRID_Y, 0]}>
+      <lineSegments geometry={FLOOR_GRID_GEOMETRY} frustumCulled={false}>
+        <lineBasicMaterial color="#c0c0c0" transparent opacity={GRID_LINE_OPACITY} fog />
+      </lineSegments>
+
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.004, 0]}
+        receiveShadow
+        frustumCulled={false}
+      >
+        <planeGeometry args={[140, 140]} />
+        <shadowMaterial transparent opacity={SHADOW_PLANE_OPACITY} color="#000000" />
+      </mesh>
+    </group>
+  );
+}
+
 type CharacterProps = {
   phase: IntroPhase;
   activeAnim: string;
@@ -559,6 +631,15 @@ function Character({
   useEffect(() => {
     onActionsReady(actions);
   }, [actions, onActionsReady]);
+
+  useEffect(() => {
+    gltf.scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = false;
+      }
+    });
+  }, [gltf.scene]);
 
   useEffect(() => {
     if (phase === "walking") {
@@ -721,16 +802,6 @@ function Character({
   return (
     <group ref={groupRef} scale={WALK_START.scale} position={[0, WALK_START.y, WALK_START.z]}>
       <primitive object={gltf.scene} rotation={[0, 0, 0]} />
-      <ContactShadows
-        position={[0, WALK_END.y + 0.02, WALK_END.z]}
-        opacity={0.22}
-        scale={2.8}
-        blur={2.2}
-        far={1.6}
-        color="#000000"
-        frames={Infinity}
-        resolution={256}
-      />
     </group>
   );
 }
@@ -1344,7 +1415,6 @@ export default function ExplorePage() {
 
   return (
     <main className="character-intro-page">
-      <div className="character-intro-floor-grid" aria-hidden="true" />
 
       <button
         type="button"
@@ -1392,10 +1462,29 @@ export default function ExplorePage() {
         }${cinematicFadeOut ? " character-intro-canvas-wrap--cinematic-out" : ""}`}
         aria-hidden={phase === "fade-in"}
       >
-        <Canvas camera={{ position: [0, 1.4, 5], fov: 35 }}>
-          <ambientLight intensity={1.15} />
-          <directionalLight position={[3, 4, 5]} intensity={1.45} />
-          <directionalLight position={[-2, 2, 3]} intensity={0.35} />
+        <Canvas shadows camera={{ position: [0, 1.4, 5], fov: 35 }}>
+          <color attach="background" args={["#ffffff"]} />
+          <fogExp2 attach="fog" args={["#ffffff", GRID_FOG_DENSITY]} />
+
+          <ambientLight intensity={1.05} />
+          <directionalLight
+            castShadow
+            position={[2.5, 7, 5]}
+            intensity={1.4}
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-far={45}
+            shadow-camera-left={-12}
+            shadow-camera-right={12}
+            shadow-camera-top={12}
+            shadow-camera-bottom={-12}
+            shadow-bias={-0.00012}
+            shadow-normalBias={0.025}
+            shadow-radius={2.5}
+          />
+          <directionalLight position={[-2, 2, 3]} intensity={0.28} />
+
+          <WalkFloorGrid phase={phase} />
 
           <Suspense fallback={null}>
             <Character
