@@ -2998,7 +2998,7 @@ video.case-study-evolution-media {
 }
 
 /* ————————————————————————————————
-   Character intro (standalone)
+   Explore (character experience)
    ———————————————————————————————— */
 
 .character-intro-page {
@@ -3008,6 +3008,52 @@ video.case-study-evolution-media {
   overflow: hidden;
   background: var(--bg);
   color: var(--fg);
+}
+
+.character-intro-floor-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 1px, transparent 1px);
+  background-size: 120px 120px;
+  background-position: center bottom;
+  opacity: 0.18;
+  mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.35) 28%, black 55%);
+}
+
+.character-intro-audio-toggle {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--fg);
+  opacity: 0.72;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+
+.character-intro-audio-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.character-intro-audio-toggle:hover {
+  opacity: 1;
 }
 
 .character-intro-dev-reset {
@@ -3058,6 +3104,7 @@ video.case-study-evolution-media {
 .character-intro-canvas-wrap {
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .character-intro-canvas-wrap--hidden {
@@ -3091,40 +3138,64 @@ video.case-study-evolution-media {
   z-index: 20;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(0.75rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    calc(1rem + env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
   align-items: center;
-  padding: 0 1.25rem calc(1.75rem + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.character-intro-ui-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 760px;
+  margin: auto auto 0;
   pointer-events: none;
 }
 
 .character-dialogue-box {
   position: relative;
-  width: min(760px, calc(100vw - 32px));
-  min-height: 132px;
-  padding: 28px 32px;
+  width: 100%;
+  align-self: stretch;
+  min-height: 0;
+  padding: clamp(1rem, 3.5vw, 1.75rem) clamp(1rem, 4vw, 2rem);
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
   pointer-events: auto;
   overflow: visible;
+  flex-shrink: 0;
 }
 
 .character-dialogue-skip {
   position: absolute;
   top: 14px;
   right: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   appearance: none;
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--fg-muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   opacity: 0.72;
   cursor: pointer;
+}
+
+.character-dialogue-skip svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .character-dialogue-skip:hover {
@@ -3133,19 +3204,26 @@ video.case-study-evolution-media {
 }
 
 .character-dialogue-kicker {
-  margin: 0 0 0.65rem;
-  padding-right: 3rem;
+  margin: 0 0 clamp(0.35rem, 1.5vw, 0.65rem);
+  padding-right: 2.75rem;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: clamp(9px, 2.5vw, 11px);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--fg-muted);
 }
 
+.character-dialogue-kicker-sub {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
 .character-dialogue-text {
   margin: 0;
   max-width: 100%;
-  font-size: clamp(18px, 2.6vw, 23px);
+  font-size: clamp(12px, 3.28vw, 18.4px);
   line-height: 1.35;
   font-weight: 500;
   color: var(--fg);
@@ -3156,10 +3234,10 @@ video.case-study-evolution-media {
 .character-intro-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: clamp(0.5rem, 2vw, 0.75rem);
   width: min(100%, 34rem);
-  margin-top: 1rem;
   pointer-events: auto;
+  flex-shrink: 0;
 }
 
 .character-intro-choice-btn {
@@ -3186,19 +3264,39 @@ video.case-study-evolution-media {
   border-color: var(--fg);
 }
 
+.character-intro-choice-btn--highlight {
+  border-color: color-mix(in srgb, var(--fg) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent);
+  animation: character-intro-duorin-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes character-intro-duorin-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 8%, transparent);
+  }
+}
+
 .character-intro-actions {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.65rem;
   width: min(100%, 34rem);
-  margin-top: 1rem;
   pointer-events: auto;
+  flex-shrink: 0;
 }
 
 .character-intro-action-btn {
   appearance: none;
   margin: 0;
-  padding: 0.85rem 1rem;
+  width: auto;
+  min-width: min(100%, 14rem);
+  padding: 0.85rem 1.35rem;
   border: 1px solid var(--border-color);
   border-radius: 999px;
   background: var(--bg);
@@ -3226,7 +3324,49 @@ video.case-study-evolution-media {
 }
 
 @media (max-width: 560px) {
+  .character-intro-ui {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .character-intro-ui-stack {
+    gap: 0.65rem;
+    max-width: 100%;
+  }
+
+  .character-dialogue-box {
+    padding: 0.9rem 0.95rem 1rem;
+  }
+
+  .character-dialogue-skip {
+    top: 10px;
+    right: 12px;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .character-dialogue-skip svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .character-intro-choices,
+  .character-intro-actions {
+    width: 100%;
+  }
+
+  .character-intro-actions {
+    align-items: stretch;
+  }
+
   .character-intro-choices {
     grid-template-columns: 1fr;
+  }
+
+  .character-intro-choice-btn,
+  .character-intro-action-btn {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    font-size: clamp(14px, 3.8vw, 16px);
   }
 }

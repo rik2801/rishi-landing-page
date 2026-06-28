@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  async redirects() {
+    return [
+      {
+        source: "/character-intro",
+        destination: "/explore",
+        permanent: true,
+      },
+    ];
+  },
   // Avoid stale CSS/JS chunks in the browser while iterating locally (globals.css edits not “sticking”).
   ...(process.env.NODE_ENV === "development"
     ? {

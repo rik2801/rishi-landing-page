@@ -15,17 +15,46 @@ import {
 import * as THREE from "three";
 
 const MODEL_PATH = "/models/rik-character.glb";
-const TYPE_SPEED = 28;
+const TYPE_SPEED_MIN = 25;
+const TYPE_SPEED_MAX = 35;
+const DIALOGUE_PAUSE_MS = 300;
+const INITIAL_PAUSE_MIN_MS = 300;
+const INITIAL_PAUSE_MAX_MS = 500;
+const IDLE_NUDGE_1_MS = 10_000;
+const IDLE_NUDGE_2_MS = 15_000;
+const RECOMMENDATION_MS = 15_000;
 const EXIT_FADE_MS = 900;
 const CONFIRM_IDLE_WAIT_MS = 1500;
 const CONFIRM_FALLBACK_MS = 4000;
 const CONFIRM_FADE_AT = 0.9;
 
+const SOUNDS = {
+  footstep: "/sounds/footstep.mp3",
+  tick: "/sounds/ui-tick.mp3",
+  select: "/sounds/select-click.mp3",
+} as const;
+
 const STORAGE = {
   hasVisitedIntro: "rik_hasVisitedIntro",
   lastViewedCaseStudy: "rik_lastViewedCaseStudy",
+  viewedCaseStudies: "rik_viewedCaseStudies",
+  lastGreetingIndex: "rik_lastGreetingIndex",
+  audioMuted: "rik_audioMuted",
   animationUsage: "rik_animationUsage",
 } as const;
+
+const GREETING_SEQUENCES = [
+  ["...", "Hey.", "I'm Rishi.", "Let's find the right one."],
+  ["Welcome.", "I'm Rishi.", "Take a look around."],
+  ["Hey.", "Glad you're here.", "Let's explore."],
+] as const;
+
+const ALL_VIEWED_DIALOGUE = [
+  "You've seen everything.",
+  "Thanks for taking the tour.",
+] as const;
+
+const DUORIN_HREF = "/case-studies/duorin";
 
 /** Case-study exit sequence (repeats): bow → idle → rope → bow → idle×4 → bow → idle → rope → idle */
 const CONFIRM_TRANSITION_SEQUENCE = [
@@ -197,7 +226,7 @@ type CaseStudy = {
   description: string;
 };
 
-type DialogueMode = "opening" | "preview" | null;
+type DialogueMode = "opening" | "preview" | "waiting-nudge" | null;
 
 const CASE_STUDIES: CaseStudy[] = [
   {
@@ -226,6 +255,18 @@ const CASE_STUDIES: CaseStudy[] = [
   },
 ];
 
+function randomTypeSpeed() {
+  return TYPE_SPEED_MIN + Math.floor(Math.random() * (TYPE_SPEED_MAX - TYPE_SPEED_MIN + 1));
+}
+
+function randomInitialPause() {
+  return INITIAL_PAUSE_MIN_MS + Math.floor(Math.random() * (INITIAL_PAUSE_MAX_MS - INITIAL_PAUSE_MIN_MS + 1));
+}
+
+function hrefToSlug(href: string) {
+  return href.split("/").filter(Boolean).pop() ?? href;
+}
+
 function readIntroMemory() {
   if (typeof window === "undefined") {
     return { hasVisitedIntro: false, lastViewedHref: null as string | null };
@@ -237,13 +278,98 @@ function readIntroMemory() {
   };
 }
 
-function saveLastViewedCaseStudy(href: string) {
+function readViewedCaseStudies(): string[] {
+  if (typeof window === "undefined") return [];
+
+  const raw = localStorage.getItem(STORAGE.viewedCaseStudies);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function hasViewedAllCaseStudies() {
+  const viewed = new Set(readViewedCaseStudies());
+  return CASE_STUDIES.every((study) => viewed.has(hrefToSlug(study.href)));
+}
+
+function recordCaseStudyView(href: string) {
+  const slug = hrefToSlug(href);
+  const viewed = new Set(readViewedCaseStudies());
+  viewed.add(slug);
+  localStorage.setItem(STORAGE.viewedCaseStudies, JSON.stringify([...viewed]));
   localStorage.setItem(STORAGE.lastViewedCaseStudy, href);
+}
+
+function saveLastViewedCaseStudy(href: string) {
+  recordCaseStudyView(href);
+}
+
+function pickGreetingIndex() {
+  const lastRaw = localStorage.getItem(STORAGE.lastGreetingIndex);
+  const lastIndex = lastRaw !== null ? Number.parseInt(lastRaw, 10) : -1;
+  let index = Math.floor(Math.random() * GREETING_SEQUENCES.length);
+
+  if (GREETING_SEQUENCES.length > 1) {
+    while (index === lastIndex) {
+      index = Math.floor(Math.random() * GREETING_SEQUENCES.length);
+    }
+  }
+
+  localStorage.setItem(STORAGE.lastGreetingIndex, String(index));
+  return index;
+}
+
+function pickReturnDialogue(lastViewedHref: string) {
+  if (hasViewedAllCaseStudies()) {
+    return [...ALL_VIEWED_DIALOGUE];
+  }
+
+  const caseStudyName = getCaseStudyLabel(lastViewedHref);
+  const options = [
+    [`How was ${caseStudyName}?`],
+    ["Back for another one?"],
+    ["Ready to explore something else?"],
+  ] as const;
+
+  return [...options[Math.floor(Math.random() * options.length)]];
+}
+
+function readAudioMuted() {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(STORAGE.audioMuted) === "true";
+}
+
+function saveAudioMuted(muted: boolean) {
+  localStorage.setItem(STORAGE.audioMuted, muted ? "true" : "false");
+}
+
+function playSound(
+  src: string,
+  { loop = false, volume = 0.35, muted = readAudioMuted() }: { loop?: boolean; volume?: number; muted?: boolean } = {},
+) {
+  if (muted) return null;
+
+  try {
+    const audio = new Audio(src);
+    audio.loop = loop;
+    audio.volume = volume;
+    void audio.play().catch(() => {});
+    return audio;
+  } catch {
+    return null;
+  }
 }
 
 function clearIntroMemory() {
   localStorage.removeItem(STORAGE.hasVisitedIntro);
   localStorage.removeItem(STORAGE.lastViewedCaseStudy);
+  localStorage.removeItem(STORAGE.viewedCaseStudies);
+  localStorage.removeItem(STORAGE.lastGreetingIndex);
   localStorage.removeItem("rik_skipNarration");
   localStorage.removeItem(STORAGE.animationUsage);
 }
@@ -347,7 +473,7 @@ function pickWaitIdle() {
 
 function assertWaitIdleAllowed(name: string) {
   if (FORBIDDEN_IDLE_ANIMS.has(name)) {
-    throw new Error(`[character-intro] Forbidden wait idle: ${name}`);
+    throw new Error(`[explore] Forbidden wait idle: ${name}`);
   }
 }
 
@@ -603,7 +729,7 @@ function Character({
 
 useGLTF.preload(MODEL_PATH);
 
-export default function CharacterIntroPage() {
+export default function ExplorePage() {
   const router = useRouter();
   const [lastViewedHref, setLastViewedHref] = useState<string | null>(null);
   const [phase, setPhase] = useState<IntroPhase>("fade-in");
@@ -621,9 +747,12 @@ export default function CharacterIntroPage() {
   const [actionsReady, setActionsReady] = useState(false);
   const [fadeDone, setFadeDone] = useState(false);
   const [flowKey, setFlowKey] = useState(0);
+  const [audioMuted, setAudioMuted] = useState(false);
+  const [highlightDuorin, setHighlightDuorin] = useState(false);
 
   const fullDialogueRef = useRef("");
   const typewriterIntervalRef = useRef<number | null>(null);
+  const initialPauseTimerRef = useRef<number | null>(null);
   const onTypewriterDoneRef = useRef<(() => void) | null>(null);
   const dialogueModeRef = useRef<DialogueMode>(null);
   const dialogueLinesRef = useRef<string[]>([]);
@@ -634,6 +763,49 @@ export default function CharacterIntroPage() {
   const forceWalkIntroRef = useRef(false);
   const pendingRouteRef = useRef<string | null>(null);
   const confirmExitStartedRef = useRef(false);
+  const idleTimersRef = useRef<number[]>([]);
+  const idleNudge1ShownRef = useRef(false);
+  const idleNudge2ShownRef = useRef(false);
+  const recommendationShownRef = useRef(false);
+  const footstepAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUnlockedRef = useRef(false);
+  const phaseRef = useRef(phase);
+  const showChoicesRef = useRef(showChoices);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
+    showChoicesRef.current = showChoices;
+  }, [showChoices]);
+
+  useEffect(() => {
+    setAudioMuted(readAudioMuted());
+  }, []);
+
+  const startFootsteps = useCallback(() => {
+    if (audioMuted || phaseRef.current !== "walking") return;
+
+    if (footstepAudioRef.current) {
+      if (footstepAudioRef.current.paused) {
+        void footstepAudioRef.current.play().catch(() => {});
+      }
+      return;
+    }
+
+    footstepAudioRef.current = playSound(SOUNDS.footstep, {
+      loop: true,
+      volume: 0.35,
+      muted: audioMuted,
+    });
+  }, [audioMuted]);
+
+  const unlockAudio = useCallback(() => {
+    if (audioUnlockedRef.current) return;
+    audioUnlockedRef.current = true;
+    startFootsteps();
+  }, [startFootsteps]);
 
   const handleActionsReady = useCallback(
     (actions: Record<string, THREE.AnimationAction | null | undefined>) => {
@@ -652,7 +824,24 @@ export default function CharacterIntroPage() {
       window.clearInterval(typewriterIntervalRef.current);
       typewriterIntervalRef.current = null;
     }
+
+    if (initialPauseTimerRef.current !== null) {
+      window.clearTimeout(initialPauseTimerRef.current);
+      initialPauseTimerRef.current = null;
+    }
   }, []);
+
+  const clearIdleTimers = useCallback(() => {
+    idleTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    idleTimersRef.current = [];
+    idleNudge1ShownRef.current = false;
+    idleNudge2ShownRef.current = false;
+    setHighlightDuorin(false);
+  }, []);
+
+  const resetIdleBehavior = useCallback(() => {
+    clearIdleTimers();
+  }, [clearIdleTimers]);
 
   const startTalkBlock = useCallback(() => {
     if (talkBlockActiveRef.current) return;
@@ -680,28 +869,103 @@ export default function CharacterIntroPage() {
   }, []);
 
   const startTypewriter = useCallback(
-    (text: string, onDone?: () => void) => {
+    (text: string, onDone?: () => void, options?: { initialPauseMs?: number }) => {
       clearTypewriter();
       fullDialogueRef.current = text;
-      setDisplayedDialogue("");
-      setIsTyping(true);
       onTypewriterDoneRef.current = onDone ?? null;
 
-      let index = 0;
-      typewriterIntervalRef.current = window.setInterval(() => {
-        index += 1;
-        setDisplayedDialogue(text.slice(0, index));
+      const beginTyping = () => {
+        setDisplayedDialogue("");
+        setIsTyping(true);
 
-        if (index >= text.length) {
-          clearTypewriter();
-          setIsTyping(false);
-          onTypewriterDoneRef.current?.();
-          onTypewriterDoneRef.current = null;
-        }
-      }, TYPE_SPEED);
+        const speed = randomTypeSpeed();
+        let index = 0;
+        typewriterIntervalRef.current = window.setInterval(() => {
+          index += 1;
+          setDisplayedDialogue(text.slice(0, index));
+
+          if (index >= text.length) {
+            clearTypewriter();
+            setIsTyping(false);
+            onTypewriterDoneRef.current?.();
+            onTypewriterDoneRef.current = null;
+          }
+        }, speed);
+      };
+
+      const pause = options?.initialPauseMs ?? randomInitialPause();
+      setIsTyping(true);
+      initialPauseTimerRef.current = window.setTimeout(() => {
+        initialPauseTimerRef.current = null;
+        beginTyping();
+      }, pause);
     },
     [clearTypewriter],
   );
+
+  const showWaitingDialogue = useCallback(
+    (lines: string[]) => {
+      dialogueModeRef.current = "waiting-nudge";
+      let step = 0;
+
+      const runLine = () => {
+        startTypewriter(
+          lines[step],
+          () => {
+            step += 1;
+            if (step < lines.length) {
+              const timer = window.setTimeout(runLine, DIALOGUE_PAUSE_MS);
+              idleTimersRef.current.push(timer);
+            } else {
+              dialogueModeRef.current = null;
+            }
+          },
+          { initialPauseMs: step === 0 ? randomInitialPause() : 0 },
+        );
+      };
+
+      runLine();
+    },
+    [startTypewriter],
+  );
+
+  const scheduleIdleBehavior = useCallback(() => {
+    clearIdleTimers();
+
+    const t1 = window.setTimeout(() => {
+      if (phaseRef.current !== "waiting" || !showChoicesRef.current || idleNudge1ShownRef.current) {
+        return;
+      }
+
+      idleNudge1ShownRef.current = true;
+      showWaitingDialogue(["Still deciding?"]);
+    }, IDLE_NUDGE_1_MS);
+
+    const tRec = window.setTimeout(() => {
+      if (
+        phaseRef.current !== "waiting" ||
+        !showChoicesRef.current ||
+        recommendationShownRef.current
+      ) {
+        return;
+      }
+
+      recommendationShownRef.current = true;
+      setHighlightDuorin(true);
+      showWaitingDialogue(["If you're new...", "I'd probably start with Duorin."]);
+    }, RECOMMENDATION_MS);
+
+    const t2 = window.setTimeout(() => {
+      if (phaseRef.current !== "waiting" || !showChoicesRef.current || idleNudge2ShownRef.current) {
+        return;
+      }
+
+      idleNudge2ShownRef.current = true;
+      showWaitingDialogue(["Take your time."]);
+    }, IDLE_NUDGE_1_MS + IDLE_NUDGE_2_MS);
+
+    idleTimersRef.current = [t1, tRec, t2];
+  }, [clearIdleTimers, showWaitingDialogue]);
 
   const runOpeningStep = useCallback(() => {
     const lines = dialogueLinesRef.current;
@@ -713,59 +977,86 @@ export default function CharacterIntroPage() {
     }
 
     startTalkBlock();
-    startTypewriter(lines[step], () => {
-      dialogueStepRef.current += 1;
-      window.setTimeout(() => {
-        if (dialogueStepRef.current >= lines.length) {
-          enterWaiting();
-        } else {
-          runOpeningStep();
-        }
-      }, 400);
-    });
+    startTypewriter(
+      lines[step],
+      () => {
+        dialogueStepRef.current += 1;
+        window.setTimeout(() => {
+          if (dialogueStepRef.current >= lines.length) {
+            enterWaiting();
+          } else {
+            runOpeningStep();
+          }
+        }, DIALOGUE_PAUSE_MS);
+      },
+      { initialPauseMs: step === 0 ? randomInitialPause() : 0 },
+    );
   }, [enterWaiting, startTalkBlock, startTypewriter]);
 
+  const runPreviewStep = useCallback(() => {
+    const lines = dialogueLinesRef.current;
+    const step = dialogueStepRef.current;
+
+    if (step >= lines.length) {
+      talkBlockActiveRef.current = false;
+      const idle = pickWaitIdle();
+      setPhase("waiting");
+      setActiveAnim(idle);
+      setCurrentAnimation(idle);
+      setShowPreviewActions(true);
+      return;
+    }
+
+    startTalkBlock();
+    startTypewriter(
+      lines[step],
+      () => {
+        dialogueStepRef.current += 1;
+        window.setTimeout(() => {
+          if (dialogueStepRef.current >= lines.length) {
+            talkBlockActiveRef.current = false;
+            const idle = pickWaitIdle();
+            setPhase("waiting");
+            setActiveAnim(idle);
+            setCurrentAnimation(idle);
+            setShowPreviewActions(true);
+          } else {
+            runPreviewStep();
+          }
+        }, DIALOGUE_PAUSE_MS);
+      },
+      { initialPauseMs: step === 0 ? randomInitialPause() : 0 },
+    );
+  }, [startTalkBlock, startTypewriter]);
+
   const beginOpeningDialogue = useCallback(() => {
+    resetIdleBehavior();
     const memory = readIntroMemory();
 
     if (memory.lastViewedHref) {
-      const caseStudyName = getCaseStudyLabel(memory.lastViewedHref);
-      dialogueLinesRef.current = [
-        `How was ${caseStudyName}?`,
-        "Want to look at something else?",
-      ];
+      dialogueLinesRef.current = pickReturnDialogue(memory.lastViewedHref);
     } else {
-      dialogueLinesRef.current = [
-        "Hey, I'm Rishi.",
-        "You're probably here for the case studies.",
-        "Which one do you want to look at?",
-      ];
+      const greetingIndex = pickGreetingIndex();
+      dialogueLinesRef.current = [...GREETING_SEQUENCES[greetingIndex]];
     }
 
     dialogueModeRef.current = "opening";
     dialogueStepRef.current = 0;
     talkBlockActiveRef.current = false;
     runOpeningStep();
-  }, [runOpeningStep]);
+  }, [runOpeningStep, resetIdleBehavior]);
 
   const beginPreviewDialogue = useCallback(
     (study: CaseStudy) => {
+      resetIdleBehavior();
       dialogueModeRef.current = "preview";
-      talkBlockActiveRef.current = true;
-      setPhase("preview");
-      setActiveAnim(ANIM.talk);
-      setCurrentAnimation(ANIM.talk);
+      dialogueLinesRef.current = ["Nice pick.", getPreviewDialogue(study)];
+      dialogueStepRef.current = 0;
+      talkBlockActiveRef.current = false;
       setShowPreviewActions(false);
-      startTypewriter(getPreviewDialogue(study), () => {
-        talkBlockActiveRef.current = false;
-        const idle = pickWaitIdle();
-        setPhase("waiting");
-        setActiveAnim(idle);
-        setCurrentAnimation(idle);
-        setShowPreviewActions(true);
-      });
+      runPreviewStep();
     },
-    [startTypewriter],
+    [runPreviewStep, resetIdleBehavior],
   );
 
   const proceedToNextDialogueStep = useCallback(() => {
@@ -777,32 +1068,41 @@ export default function CharacterIntroPage() {
     }
 
     if (mode === "preview") {
-      talkBlockActiveRef.current = false;
-      const idle = pickWaitIdle();
-      setPhase("waiting");
-      setActiveAnim(idle);
-      setCurrentAnimation(idle);
-      setShowPreviewActions(true);
+      runPreviewStep();
+      return;
     }
-  }, [runOpeningStep]);
+  }, [runOpeningStep, runPreviewStep]);
 
   const skipTypewriter = useCallback(() => {
+    resetIdleBehavior();
+
     if (isTyping) {
+      if (initialPauseTimerRef.current !== null) {
+        window.clearTimeout(initialPauseTimerRef.current);
+        initialPauseTimerRef.current = null;
+      }
+
       clearTypewriter();
       setDisplayedDialogue(fullDialogueRef.current);
       setIsTyping(false);
       onTypewriterDoneRef.current?.();
       onTypewriterDoneRef.current = null;
+
+      if (phaseRef.current === "waiting" && showChoicesRef.current) {
+        scheduleIdleBehavior();
+      }
       return;
     }
 
     proceedToNextDialogueStep();
-  }, [clearTypewriter, isTyping, proceedToNextDialogueStep]);
+  }, [clearTypewriter, isTyping, proceedToNextDialogueStep, resetIdleBehavior, scheduleIdleBehavior]);
 
   const resetIntroFlow = useCallback(() => {
     clearTypewriter();
+    clearIdleTimers();
     clearIntroMemory();
     forceWalkIntroRef.current = true;
+    recommendationShownRef.current = false;
 
     fullDialogueRef.current = "";
     onTypewriterDoneRef.current = null;
@@ -813,6 +1113,11 @@ export default function CharacterIntroPage() {
     forceWalkIntroRef.current = true;
     pendingRouteRef.current = null;
     confirmExitStartedRef.current = false;
+
+    if (footstepAudioRef.current) {
+      footstepAudioRef.current.pause();
+      footstepAudioRef.current = null;
+    }
 
     setLastViewedHref(null);
     setPhase("fade-in");
@@ -826,11 +1131,12 @@ export default function CharacterIntroPage() {
     setIsRouting(false);
     setActionsReady(false);
     setFadeDone(false);
+    setHighlightDuorin(false);
     setActiveAnim(ANIM.walk);
     setActiveAnimLoop(true);
     setCurrentAnimation(ANIM.walk);
     setFlowKey((key) => key + 1);
-  }, [clearTypewriter]);
+  }, [clearTypewriter, clearIdleTimers]);
 
   useEffect(() => {
     const memory = readIntroMemory();
@@ -875,6 +1181,45 @@ export default function CharacterIntroPage() {
 
   useEffect(() => () => clearTypewriter(), [clearTypewriter]);
 
+  useEffect(() => {
+    if (phase !== "waiting" || !showChoices) {
+      clearIdleTimers();
+      return;
+    }
+
+    scheduleIdleBehavior();
+    return clearIdleTimers;
+  }, [phase, showChoices, scheduleIdleBehavior, clearIdleTimers]);
+
+  useEffect(() => {
+    if (phase !== "walking" || audioMuted) {
+      if (footstepAudioRef.current) {
+        footstepAudioRef.current.pause();
+        footstepAudioRef.current = null;
+      }
+      return;
+    }
+
+    startFootsteps();
+
+    return () => {
+      if (footstepAudioRef.current) {
+        footstepAudioRef.current.pause();
+        footstepAudioRef.current = null;
+      }
+    };
+  }, [phase, audioMuted, startFootsteps]);
+
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, [unlockAudio]);
+
   const handleWalkComplete = useCallback(() => {
     beginOpeningDialogue();
   }, [beginOpeningDialogue]);
@@ -899,9 +1244,34 @@ export default function CharacterIntroPage() {
     }, EXIT_FADE_MS);
   }, [router]);
 
+  const handleChoiceInteraction = useCallback(() => {
+    unlockAudio();
+    resetIdleBehavior();
+    if (phaseRef.current === "waiting" && showChoicesRef.current) {
+      scheduleIdleBehavior();
+    }
+  }, [unlockAudio, resetIdleBehavior, scheduleIdleBehavior]);
+
+  const toggleAudio = useCallback(() => {
+    unlockAudio();
+    const next = !audioMuted;
+    setAudioMuted(next);
+    saveAudioMuted(next);
+
+    if (next && footstepAudioRef.current) {
+      footstepAudioRef.current.pause();
+      footstepAudioRef.current = null;
+    } else if (!next && phaseRef.current === "walking") {
+      startFootsteps();
+    }
+  }, [audioMuted, unlockAudio, startFootsteps]);
+
   const handleCaseStudySelect = (study: CaseStudy) => {
     if (isRouting || !showChoices) return;
 
+    resetIdleBehavior();
+    unlockAudio();
+    playSound(SOUNDS.select, { volume: 0.45, muted: audioMuted });
     setShowChoices(false);
     setSelectedStudy(study);
     beginPreviewDialogue(study);
@@ -921,7 +1291,7 @@ export default function CharacterIntroPage() {
     setActiveAnimLoop(picked.loop);
     setCurrentAnimation(picked.name);
     setPhase("confirming");
-    startTypewriter("Good choice. Let's go.");
+    startTypewriter("That's one of my favourites.");
 
     saveLastViewedCaseStudy(selectedStudy.href);
     setLastViewedHref(selectedStudy.href);
@@ -930,6 +1300,7 @@ export default function CharacterIntroPage() {
   const handleBackToChoices = () => {
     if (isRouting) return;
 
+    resetIdleBehavior();
     clearTypewriter();
     setIsTyping(false);
     setDisplayedDialogue("");
@@ -950,12 +1321,46 @@ export default function CharacterIntroPage() {
 
   return (
     <main className="character-intro-page">
+      <div className="character-intro-floor-grid" aria-hidden="true" />
+
       <button
         type="button"
-        className="character-intro-dev-reset"
-        onClick={resetIntroFlow}
+        className="character-intro-audio-toggle"
+        onClick={toggleAudio}
+        aria-label={audioMuted ? "Unmute sound" : "Mute sound"}
+        aria-pressed={audioMuted}
       >
-        Reset
+        {audioMuted ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+            <path d="m22 9-6 6" />
+            <path d="m16 9 6 6" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+        )}
       </button>
 
       <div className="character-intro-debug" aria-hidden="true">
@@ -995,56 +1400,85 @@ export default function CharacterIntroPage() {
       />
 
       <div className="character-intro-ui">
-        {showDialogueBox ? (
-          <div className="character-dialogue-box" role="status" aria-live="polite">
-            <button
-              type="button"
-              className="character-dialogue-skip"
-              onClick={skipTypewriter}
-            >
-              Skip
-            </button>
-            <p className="character-dialogue-kicker">Rishi Kiran</p>
-            <p className="character-dialogue-text">{displayedDialogue}</p>
-          </div>
-        ) : null}
+        <div className="character-intro-ui-stack">
+          {showDialogueBox ? (
+            <div className="character-dialogue-box" role="status" aria-live="polite">
+              {isTyping ? (
+                <button
+                  type="button"
+                  className="character-dialogue-skip"
+                  onClick={skipTypewriter}
+                  onPointerDown={unlockAudio}
+                  aria-label="Skip dialogue"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 17 5-5-5-5" />
+                    <path d="m13 17 5-5-5-5" />
+                  </svg>
+                </button>
+              ) : null}
+              <p className="character-dialogue-kicker">
+                Rishi
+                <span className="character-dialogue-kicker-sub"> // Product Designer</span>
+              </p>
+              <p className="character-dialogue-text">{displayedDialogue}</p>
+            </div>
+          ) : null}
 
-        {showChoices ? (
-          <div className="character-intro-choices" role="group" aria-label="Choose a case study">
-            {choiceStudies.map((study) => (
+          {showChoices ? (
+            <div className="character-intro-choices" role="group" aria-label="Choose a case study">
+              {choiceStudies.map((study) => (
+                <button
+                  key={study.href}
+                  type="button"
+                  className={`character-intro-choice-btn${
+                    highlightDuorin && study.href === DUORIN_HREF
+                      ? " character-intro-choice-btn--highlight"
+                      : ""
+                  }`}
+                  onClick={() => handleCaseStudySelect(study)}
+                  onMouseEnter={() => {
+                    handleChoiceInteraction();
+                    playSound(SOUNDS.tick, { volume: 0.35, muted: audioMuted });
+                  }}
+                  disabled={isRouting}
+                >
+                  {study.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {showPreviewActions && selectedStudy ? (
+            <div className="character-intro-actions" role="group" aria-label="Preview actions">
               <button
-                key={study.href}
                 type="button"
-                className="character-intro-choice-btn"
-                onClick={() => handleCaseStudySelect(study)}
+                className="character-intro-action-btn character-intro-action-btn--primary"
+                onClick={handleViewFullCaseStudy}
                 disabled={isRouting}
               >
-                {study.label}
+                View full case study
               </button>
-            ))}
-          </div>
-        ) : null}
-
-        {showPreviewActions && selectedStudy ? (
-          <div className="character-intro-actions" role="group" aria-label="Preview actions">
-            <button
-              type="button"
-              className="character-intro-action-btn character-intro-action-btn--primary"
-              onClick={handleViewFullCaseStudy}
-              disabled={isRouting}
-            >
-              View full case study
-            </button>
-            <button
-              type="button"
-              className="character-intro-action-btn"
-              onClick={handleBackToChoices}
-              disabled={isRouting}
-            >
-              Back to choices
-            </button>
-          </div>
-        ) : null}
+              <button
+                type="button"
+                className="character-intro-action-btn"
+                onClick={handleBackToChoices}
+                disabled={isRouting}
+              >
+                Back to choices
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
     </main>
   );
