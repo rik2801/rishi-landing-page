@@ -1,99 +1,54 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CaseStudyCard } from "@/components/case-study-card";
 
 export const metadata: Metadata = {
   title: "Case Studies — Rishi Kiran",
   description:
-    "Selected product design, UX, and technical product work across AI, behavior design, marketplaces, and civic systems.",
+    "Choose how to explore product design and UX case studies — classic reading format or an interactive 3D experience.",
 };
 
-type CaseStudyListItem = {
-  title: string;
-  description: string;
-  roleLabel: string;
-  href: string;
-  featured?: boolean;
-};
+const MODES = [
+  {
+    id: "classic",
+    title: "Classic",
+    description: "Read the case studies in a traditional, recruiter-friendly format.",
+    cta: "Open Classic",
+    href: "/case-studies/classic",
+  },
+  {
+    id: "interactive",
+    title: "Interactive",
+    description: "Explore the same work through an immersive 3D experience.",
+    cta: "Enter Interactive",
+    href: "/case-studies/interactive",
+  },
+] as const;
 
-const CASE_STUDIES: CaseStudyListItem[] = [
-  {
-    title: "Duorin",
-    description:
-      "A context-aware AI styling product designed to reduce outfit decision fatigue through weather, calendar, wardrobe, and preference signals.",
-    roleLabel: "AI Product · UX Engineering · Trust Systems",
-    href: "/case-studies/duorin",
-    featured: true,
-  },
-  {
-    title: "Snack'nU",
-    description:
-      "A campus food-redistribution service concept for surfacing catered surplus after events and routing time-sensitive pickups to nearby students.",
-    roleLabel: "Service Design · Campus Operations",
-    href: "/case-studies/snacknu",
-  },
-  {
-    title: "They’re Waiting",
-    description:
-      "A behavioral productivity product using time-aware nudges, urgency design, and emotional accountability to reduce procrastination.",
-    roleLabel: "Behavioral UX · Notification Strategy",
-    href: "/case-studies/theyre-waiting",
-  },
-  {
-    title: "Citizen-X",
-    description:
-      "A civic product designed to help users compare political parties through manifesto-based questions instead of personality-driven bias.",
-    roleLabel: "Civic UX · Information Architecture",
-    href: "/case-studies/citizenx",
-  },
-];
-
-export default function CaseStudiesIndexPage() {
+export default function CaseStudiesModePage() {
   return (
-    <div className="case-studies-page">
-      <header className="case-studies-header">
+    <div className="site-container site-container--case-studies">
+      <div className="case-studies-mode-page">
         <p className="case-studies-home-line">
           <Link href="/" className="link case-studies-home-link">
             Rishi Kiran
           </Link>
         </p>
-        <div className="case-studies-hero-row">
-          <div className="case-studies-hero-copy">
-            <h1 className="case-studies-title">Case Studies</h1>
-            <p className="case-studies-subtitle">
-              Selected product design, UX, and technical product work across AI, behavior design,
-              marketplaces, and civic systems.
-            </p>
-            <p className="case-studies-positioning">
-              I design AI and systems-heavy products where UX depends on logic, data, and trust, not just
-              screens.
-            </p>
-          </div>
-          <div className="case-studies-hero-art" aria-hidden="true">
-            <img
-              src="/rik.png"
-              alt=""
-              width={360}
-              height={360}
-              className="case-studies-rik-image"
-              decoding="async"
-              draggable={false}
-            />
-          </div>
-        </div>
-      </header>
-      <div className="case-studies-work-block">
-        <p className="case-studies-section-label">Selected work</p>
-        <div className="case-studies-grid">
-          {CASE_STUDIES.map((c) => (
-            <CaseStudyCard
-              key={c.href}
-              title={c.title}
-              description={c.description}
-              roleLabel={c.roleLabel}
-              href={c.href}
-              featured={c.featured}
-            />
+
+        <header className="case-studies-mode-header">
+          <h1 className="case-studies-mode-title">How would you like to explore my work?</h1>
+        </header>
+
+        <div className="case-studies-mode-grid">
+          {MODES.map((mode) => (
+            <article key={mode.id} className="case-studies-mode-card">
+              <h2 className="case-studies-mode-card-title">{mode.title}</h2>
+              <p className="case-studies-mode-card-desc">{mode.description}</p>
+              <div className="case-studies-mode-card-cta">
+                <Link href={mode.href} className="link">
+                  {mode.cta}
+                </Link>
+              </div>
+            </article>
           ))}
         </div>
       </div>

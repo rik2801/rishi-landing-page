@@ -13,7 +13,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/character-intro",
-        destination: "/explore",
+        destination: "/case-studies/interactive",
+        permanent: true,
+      },
+      {
+        source: "/explore",
+        destination: "/case-studies/interactive",
         permanent: true,
       },
     ];

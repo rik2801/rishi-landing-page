@@ -466,7 +466,7 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
             Home
           </Link>
           {" · "}
-          <Link href="/case-studies" className="link">
+          <Link href="/case-studies/classic" className="link">
             Case Studies
           </Link>
         </p>
