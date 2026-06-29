@@ -282,7 +282,7 @@ const CASE_STUDIES: CaseStudy[] = [
       "An AI stylist that helps users make confident outfit decisions. Built around taste, context, and real-world wardrobe behavior.",
   },
   {
-    label: "SnacknU",
+    label: "Snack'nU",
     href: "/case-studies/snacknu",
     description:
       "A student-focused food marketplace designed around convenience, timing, and campus behavior.",
@@ -294,7 +294,7 @@ const CASE_STUDIES: CaseStudy[] = [
       "A nudge-based experience that helps people reconnect with others through small, timely emotional prompts.",
   },
   {
-    label: "CitizenX",
+    label: "Citizen-X",
     href: "/case-studies/citizenx",
     description:
       "A civic experience focused on making public participation clearer, simpler, and easier to act on.",
