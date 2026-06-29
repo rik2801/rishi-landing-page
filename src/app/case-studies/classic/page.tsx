@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { AutoplayVideo } from "@/components/autoplay-video";
+import { CaseStudiesBreadcrumb } from "@/components/case-studies-breadcrumb";
 import { CaseStudyCard } from "@/components/case-study-card";
 
 export const metadata: Metadata = {
@@ -53,11 +53,12 @@ export default function CaseStudiesClassicPage() {
   return (
     <div className="case-studies-page">
       <header className="case-studies-header">
-        <p className="case-studies-home-line">
-          <Link href="/" className="link case-studies-home-link">
-            Rishi Kiran
-          </Link>
-        </p>
+        <CaseStudiesBreadcrumb
+          crumbs={[
+            { label: "Case Studies", href: "/case-studies" },
+            { label: "Classic" },
+          ]}
+        />
         <div className="case-studies-hero-row">
           <div className="case-studies-hero-copy">
             <h1 className="case-studies-title">Case Studies</h1>

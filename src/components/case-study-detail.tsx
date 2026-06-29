@@ -1,6 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
+import { Suspense, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { CaseStudyDetailBreadcrumb } from "@/components/case-study-detail-breadcrumb";
+import { CaseStudiesBreadcrumb } from "@/components/case-studies-breadcrumb";
 import { AutoplayVideo } from "@/components/autoplay-video";
 import { CaseStudySectionHeading } from "@/components/section-heading-glyph";
 import { CaseStudyTOC } from "@/components/case-study-toc";
@@ -461,15 +463,20 @@ export function CaseStudyDetail(props: CaseStudyDetailProps) {
         }
       >
         <div className="case-study-detail-inner">
-        <p className="case-study-back">
-          <Link href="/" className="link">
-            Home
-          </Link>
-          {" · "}
-          <Link href="/case-studies/classic" className="link">
-            Case Studies
-          </Link>
-        </p>
+        <Suspense
+          fallback={
+            <CaseStudiesBreadcrumb
+              crumbClassName="case-study-back"
+              crumbs={[
+                { label: "Case Studies", href: "/case-studies" },
+                { label: "Classic", href: "/case-studies/classic" },
+                { label: name },
+              ]}
+            />
+          }
+        >
+          <CaseStudyDetailBreadcrumb projectName={name} />
+        </Suspense>
 
         {inProgress ? (
           <p className="case-study-kicker" aria-live="polite">

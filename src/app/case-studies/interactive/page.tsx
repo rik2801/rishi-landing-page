@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { markCinematicEnter } from "@/components/portfolio-transition";
+import { CaseStudiesBreadcrumb } from "@/components/case-studies-breadcrumb";
 import { useSiteColors } from "@/hooks/use-site-colors";
 import {
   Suspense,
@@ -60,6 +61,11 @@ const ALL_VIEWED_DIALOGUE = [
 ] as const;
 
 const DUORIN_HREF = "/case-studies/duorin";
+const INTERACTIVE_DETAIL_MODE = "?mode=interactive";
+
+function withInteractiveMode(href: string) {
+  return `${href}${INTERACTIVE_DETAIL_MODE}`;
+}
 
 /** Case-study exit sequence (repeats): bow → idle → rope → bow → idle×4 → bow → idle → rope → idle */
 const CONFIRM_TRANSITION_SEQUENCE = [
@@ -1397,7 +1403,7 @@ export default function ExplorePage() {
 
     const picked = pickConfirmTransitionAnim(actionsRef.current);
     recordConfirmTransitionUse();
-    pendingRouteRef.current = selectedStudy.href;
+    pendingRouteRef.current = withInteractiveMode(selectedStudy.href);
     setActiveAnim(picked.name);
     setActiveAnimLoop(picked.loop);
     setCurrentAnimation(picked.name);
@@ -1433,6 +1439,13 @@ export default function ExplorePage() {
 
   return (
     <main className="character-intro-page">
+      <CaseStudiesBreadcrumb
+        overlay
+        crumbs={[
+          { label: "Case Studies", href: "/case-studies" },
+          { label: "Interactive" },
+        ]}
+      />
 
       <button
         type="button"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -11,16 +12,20 @@ const MODES = [
   {
     id: "classic",
     title: "Classic",
-    description: "Read the case studies in a traditional, recruiter-friendly format.",
-    cta: "Open Classic",
+    description: "Read structured case studies in a traditional portfolio format.",
+    cta: "Open",
     href: "/case-studies/classic",
+    preview: "/classic-mode-preview.webp",
+    previewAlt: "Preview of the classic case studies page",
   },
   {
     id: "interactive",
     title: "Interactive",
-    description: "Explore the same work through an immersive 3D experience.",
-    cta: "Enter Interactive",
+    description: "Explore projects through a conversational 3D guide.",
+    cta: "Enter",
     href: "/case-studies/interactive",
+    preview: "/interactive-mode-preview.webp",
+    previewAlt: "Preview of the interactive 3D case studies experience",
   },
 ] as const;
 
@@ -35,20 +40,41 @@ export default function CaseStudiesModePage() {
         </p>
 
         <header className="case-studies-mode-header">
-          <h1 className="case-studies-mode-title">How would you like to explore my work?</h1>
+          <h1 className="case-studies-mode-title">Two ways to explore the same work.</h1>
+          <p className="case-studies-mode-subtitle">
+            Choose the format that fits how you want to move through the case studies.
+          </p>
         </header>
 
         <div className="case-studies-mode-grid">
           {MODES.map((mode) => (
-            <article key={mode.id} className="case-studies-mode-card">
-              <h2 className="case-studies-mode-card-title">{mode.title}</h2>
-              <p className="case-studies-mode-card-desc">{mode.description}</p>
-              <div className="case-studies-mode-card-cta">
-                <Link href={mode.href} className="link">
-                  {mode.cta}
-                </Link>
+            <Link
+              key={mode.id}
+              href={mode.href}
+              className="case-studies-mode-card"
+              aria-label={`${mode.title}: ${mode.description}`}
+            >
+              <div className="case-studies-mode-card-preview">
+                <Image
+                  src={mode.preview}
+                  alt={mode.previewAlt}
+                  fill
+                  sizes="(min-width: 720px) 50vw, 100vw"
+                  className="case-studies-mode-card-preview-img"
+                  draggable={false}
+                />
               </div>
-            </article>
+              <div className="case-studies-mode-card-body">
+                <h2 className="case-studies-mode-card-title">{mode.title}</h2>
+                <p className="case-studies-mode-card-desc">{mode.description}</p>
+                <span className="case-studies-mode-card-cta">
+                  {mode.cta}
+                  <span className="case-studies-mode-card-cta-arrow" aria-hidden="true">
+                    →
+                  </span>
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -508,20 +508,28 @@ picture {
    Case studies
    ———————————————————————————————— */
 
-.case-studies-page {
-  --case-studies-home-nudge: calc(72px * 0.2);
-  padding-top: 72px;
-  padding-bottom: 80px;
-}
-
+.case-studies-page,
 .case-studies-mode-page {
   --case-studies-home-nudge: calc(72px * 0.2);
+  --case-studies-marker-gradient:
+    radial-gradient(circle at 20% 30%, #fc7e32 0%, transparent 42%),
+    radial-gradient(circle at 45% 45%, #fb5782 0%, transparent 45%),
+    radial-gradient(circle at 65% 60%, #e77ebd 0%, transparent 48%),
+    radial-gradient(circle at 85% 45%, #b34df3 0%, transparent 52%),
+    #fb5782;
+  --case-studies-accent-gradient: linear-gradient(
+    90deg,
+    #fc7e32 0%,
+    #fb5782 34%,
+    #e77ebd 68%,
+    #b34df3 100%
+  );
   padding-top: 72px;
   padding-bottom: 80px;
 }
 
 .case-studies-mode-header {
-  margin: 2.5rem 0 2rem;
+  margin: 2.5rem 0 2.5rem;
 }
 
 .case-studies-mode-title {
@@ -529,34 +537,167 @@ picture {
   line-height: 1.15;
   font-weight: 400;
   color: var(--fg);
+  margin: 0 0 0.85rem;
+  max-width: 34rem;
+}
+
+.case-studies-mode-subtitle {
+  font-size: clamp(16px, 2.3vw, 19px);
+  line-height: 1.42;
+  color: var(--fg);
+  opacity: 0.82;
   margin: 0;
-  max-width: 28rem;
+  max-width: 36rem;
 }
 
 .case-studies-mode-grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 720px) {
   .case-studies-mode-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 }
 
 .case-studies-mode-card {
+  position: relative;
+  isolation: isolate;
   border: 1px solid color-mix(in srgb, var(--fg) 32%, transparent);
-  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   min-height: 100%;
-  transition: border-color 0.2s ease;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: var(--bg);
+  transition:
+    border-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
 }
 
-.case-studies-mode-card:hover {
-  border-color: color-mix(in srgb, var(--fg) 45%, transparent);
+.case-studies-mode-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  opacity: 0;
+  background: var(--case-studies-accent-gradient);
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.case-studies-mode-card:hover,
+.case-study-card:hover {
+  border-color: transparent;
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #fb5782 22%, transparent),
+    0 4px 22px -4px color-mix(in srgb, #fc7e32 52%, transparent),
+    0 10px 34px -8px color-mix(in srgb, #fb5782 48%, transparent),
+    0 16px 44px -10px color-mix(in srgb, #e77ebd 42%, transparent),
+    0 22px 52px -14px color-mix(in srgb, #b34df3 38%, transparent);
+}
+
+.case-studies-mode-card:hover::after {
+  opacity: 1;
+}
+
+.case-studies-mode-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+  padding: 1.25rem 1.25rem 1.5rem;
+  background: var(--bg);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    background-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.case-studies-mode-card-body::before {
+  content: "";
+  position: absolute;
+  inset: -28%;
+  z-index: 0;
+  opacity: 0;
+  background: var(--case-studies-marker-gradient);
+  filter: blur(22px);
+  transform: scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.case-studies-mode-card-body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  background: var(--case-studies-marker-gradient);
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.case-studies-mode-card:hover .case-studies-mode-card-body::before {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+.case-studies-mode-card:hover .case-studies-mode-card-body::after {
+  opacity: 1;
+}
+
+.case-studies-mode-card:hover .case-studies-mode-card-body {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #ffffff 10%, transparent),
+    inset 0 0 48px color-mix(in srgb, #fb5782 24%, transparent);
+}
+
+.case-studies-mode-card-body > * {
+  position: relative;
+  z-index: 1;
+}
+
+.case-study-card:hover {
+  background:
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    var(--case-studies-accent-gradient) border-box;
+  background-clip: padding-box, border-box;
+  background-origin: border-box;
+}
+
+.case-studies-mode-card-preview {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  background: var(--bg);
+}
+
+.case-studies-mode-card-preview-img {
+  object-fit: cover;
+  object-position: center top;
 }
 
 .case-studies-mode-card-title {
@@ -577,12 +718,66 @@ picture {
 }
 
 .case-studies-mode-card-cta {
-  margin-top: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-end;
+  margin-top: 0.35rem;
   font-size: 15px;
+  color: var(--fg);
+  transition: transform 0.22s ease;
+}
+
+.case-studies-mode-card:hover .case-studies-mode-card-cta {
+  transform: translateX(3px);
+}
+
+.case-studies-mode-card-cta-arrow {
+  display: inline-block;
+  transition: transform 0.22s ease;
+}
+
+.case-studies-mode-card:hover .case-studies-mode-card-cta-arrow {
+  transform: translateX(2px);
 }
 
 .case-studies-home-line {
   margin: var(--case-studies-home-nudge) 0 0;
+}
+
+.case-studies-crumb-line {
+  margin: var(--case-studies-home-nudge) 0 0;
+}
+
+.case-studies-crumb-line--interactive {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 40;
+  margin: 0;
+  pointer-events: auto;
+}
+
+.case-studies-crumb {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.6;
+  color: var(--fg);
+}
+
+.case-studies-crumb-link {
+  opacity: 0.55;
+}
+
+.case-studies-crumb-link:hover {
+  opacity: 1;
+}
+
+.case-studies-crumb-current {
+  opacity: 0.55;
 }
 
 .case-studies-home-link {
@@ -699,14 +894,21 @@ video.case-studies-rik-image {
   border: 1px solid color-mix(in srgb, var(--fg) 32%, transparent);
   padding: 1.5rem 1.25rem;
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: border-color 0.2s ease;
+  background: var(--bg);
+  transition:
+    border-color 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
 }
 
-.case-study-card:hover {
-  border-color: color-mix(in srgb, var(--fg) 45%, transparent);
+.case-study-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .case-study-card--featured {
@@ -3074,11 +3276,21 @@ video.case-study-evolution-media {
    Explore (character experience)
    ———————————————————————————————— */
 
-.character-intro-page {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
+html:has(.character-intro-page),
+body:has(.character-intro-page) {
   overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+.character-intro-page {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--bg);
   color: var(--fg);
 }
@@ -3208,9 +3420,8 @@ video.case-study-evolution-media {
   z-index: 20;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
+  overscroll-behavior: none;
   padding: max(0.75rem, env(safe-area-inset-top))
     max(1rem, env(safe-area-inset-right))
     calc(1rem + env(safe-area-inset-bottom))
