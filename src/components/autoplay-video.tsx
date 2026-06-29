@@ -51,9 +51,12 @@ export function AutoplayVideo({ src, className }: AutoplayVideoProps) {
       muted
       loop
       playsInline
+      controls={false}
       controlsList="nodownload noplaybackrate noremoteplayback"
       disablePictureInPicture
+      disableRemotePlayback
       draggable={false}
+      onContextMenu={(event) => event.preventDefault()}
     />
   );
 }

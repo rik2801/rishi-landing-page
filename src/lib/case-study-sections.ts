@@ -11,6 +11,8 @@ export const CASE_STUDY_SECTION_IDS = {
   whyThisMatters: "why-this-matters",
   theProblem: "the-problem",
   turningPoint: "the-turning-point",
+  signals: "what-duorin-understands",
+  privacyContext: "privacy",
   betaLearnings: "beta-learnings",
   coreInsight: "core-insight",
   decisionEngine: "decision-engine",
@@ -46,6 +48,9 @@ export type CaseStudyTocSource = {
   contentStructure?: "duorin-merged";
   heroScreenshot?: unknown;
   personalMotivation?: { title?: string };
+  productBet?: { title?: string; tocLabel?: string };
+  signals?: { title: string; tocLabel?: string };
+  privacyContext?: { title?: string; tocLabel?: string };
   betaLearnings?: unknown;
   coreInsight?: string;
   decisionEngine?: { tocLabel?: string };
@@ -85,26 +90,28 @@ export function buildCaseStudyTocItems(source: CaseStudyTocSource): CaseStudyToc
     if (source.personalMotivation) {
       items.push({
         id: CASE_STUDY_SECTION_IDS.whyBuiltDuorin,
-        label: source.personalMotivation.title ?? "Why I Built Duorin",
+        label: source.personalMotivation.title ?? "Why Duorin Exists",
       });
     }
 
-    items.push({
-      id: CASE_STUDY_SECTION_IDS.turningPoint,
-      label: "The Turning Point",
-    });
-
-    if (source.decisionEngine) {
+    if (source.productBet) {
       items.push({
-        id: CASE_STUDY_SECTION_IDS.decisionEngine,
-        label: source.decisionEngine.tocLabel ?? "Decision Engine",
+        id: CASE_STUDY_SECTION_IDS.turningPoint,
+        label: source.productBet.tocLabel ?? source.productBet.title ?? "The Product Bet",
       });
     }
 
-    if (source.hiddenProblem || source.systemsProcessLayer) {
+    if (source.signals) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.signals,
+        label: source.signals.tocLabel ?? source.signals.title,
+      });
+    }
+
+    if (source.systemsProcessLayer) {
       items.push({
         id: CASE_STUDY_SECTION_IDS.intelligenceLayer,
-        label: source.systemsProcessLayer?.title ?? "Building the Intelligence Layer",
+        label: source.systemsProcessLayer.title,
       });
     }
 
@@ -119,6 +126,13 @@ export function buildCaseStudyTocItems(source: CaseStudyTocSource): CaseStudyToc
       items.push({
         id: CASE_STUDY_SECTION_IDS.finalProduct,
         label: source.finalExperience?.title ?? "Final Product",
+      });
+    }
+
+    if (source.privacyContext) {
+      items.push({
+        id: CASE_STUDY_SECTION_IDS.privacyContext,
+        label: source.privacyContext.tocLabel ?? source.privacyContext.title ?? "Privacy by Design",
       });
     }
 
