@@ -156,22 +156,99 @@ function ScrambleLabel({
   return <span className={className}>{display}</span>;
 }
 
-const CARD_IMAGES = [
-  "/homepage.webp",
-  "/classic-mode-preview.webp",
-  "/interactive-mode-preview.webp",
-  "/swippable-interface.webp",
-  "/citizenx-landing.webp",
-  "/citizenx-results-mobile.webp",
-  "/snacknu/student-homepage.webp",
-  "/snacknu/sketch-paper.webp",
-  "/duorin/artifacts/style-scan-output.png",
-  "/duorin/artifacts/outfit-recommendations.png",
-  "/stats.webp",
-  "/Notification.webp",
-  "/Artifact1.png",
-  "/old-scan.jpg",
-] as const;
+type GradientPreset = {
+  bg: string;
+  band: string;
+  rotation?: number;
+  offsetY?: number;
+};
+
+const GRADIENT_PRESETS: GradientPreset[] = [
+  {
+    bg: "radial-gradient(circle at 65% 25%, #ffe66d 0%, #ff9f1c 35%, #08051f 72%)",
+    band: "linear-gradient(100deg, transparent 0%, rgba(0,0,0,.75) 46%, rgba(255,110,20,.8) 52%, transparent 60%)",
+    rotation: -4,
+    offsetY: 12,
+  },
+  {
+    bg: "radial-gradient(ellipse at 30% 18%, #8ec5ff 0%, #4a6cf7 38%, #0b1026 78%)",
+    band: "linear-gradient(95deg, transparent 8%, rgba(0,0,0,.82) 44%, rgba(120,170,255,.75) 50%, transparent 62%)",
+    rotation: -7,
+    offsetY: 18,
+  },
+  {
+    bg: "radial-gradient(circle at 72% 30%, #ff7eb3 0%, #c850c0 34%, #120818 70%)",
+    band: "linear-gradient(108deg, transparent 0%, rgba(0,0,0,.7) 42%, rgba(255,90,170,.7) 49%, transparent 58%)",
+    rotation: -2,
+    offsetY: 8,
+  },
+  {
+    bg: "radial-gradient(ellipse at 50% 85%, #1a1a2e 0%, #0f0f18 55%, #000 100%)",
+    band: "linear-gradient(88deg, transparent 10%, rgba(0,0,0,.9) 48%, rgba(80,80,110,.55) 54%, transparent 66%)",
+    rotation: -9,
+    offsetY: 24,
+  },
+  {
+    bg: "radial-gradient(circle at 40% 22%, #7cffcb 0%, #2ec4b6 32%, #04342f 68%)",
+    band: "linear-gradient(102deg, transparent 4%, rgba(0,0,0,.68) 45%, rgba(46,196,182,.78) 51%, transparent 61%)",
+    rotation: -5,
+    offsetY: 14,
+  },
+  {
+    bg: "radial-gradient(ellipse at 80% 20%, #ffd166 0%, #ef476f 36%, #1a0a12 74%)",
+    band: "linear-gradient(96deg, transparent 0%, rgba(0,0,0,.78) 47%, rgba(239,71,111,.72) 53%, transparent 64%)",
+    rotation: -3,
+    offsetY: 10,
+  },
+  {
+    bg: "radial-gradient(circle at 25% 35%, #cdb4db 0%, #7b6cf6 40%, #120f24 72%)",
+    band: "linear-gradient(110deg, transparent 6%, rgba(0,0,0,.74) 43%, rgba(180,140,255,.7) 50%, transparent 59%)",
+    rotation: -6,
+    offsetY: 16,
+  },
+  {
+    bg: "radial-gradient(ellipse at 55% 15%, #f4a261 0%, #e76f51 30%, #1c0d08 70%)",
+    band: "linear-gradient(92deg, transparent 2%, rgba(0,0,0,.8) 46%, rgba(231,111,81,.76) 52%, transparent 63%)",
+    rotation: -8,
+    offsetY: 20,
+  },
+  {
+    bg: "radial-gradient(circle at 60% 28%, #90e0ef 0%, #0077b6 38%, #03045e 75%)",
+    band: "linear-gradient(104deg, transparent 0%, rgba(0,0,0,.72) 44%, rgba(0,119,182,.8) 51%, transparent 60%)",
+    rotation: -4,
+    offsetY: 11,
+  },
+  {
+    bg: "radial-gradient(ellipse at 35% 80%, #0d0d0d 0%, #1b1b1b 45%, #000 100%)",
+    band: "linear-gradient(86deg, transparent 12%, rgba(0,0,0,.92) 50%, rgba(60,60,60,.5) 56%, transparent 68%)",
+    rotation: -11,
+    offsetY: 28,
+  },
+  {
+    bg: "radial-gradient(circle at 70% 24%, #ffafcc 0%, #ff006e 34%, #2b0a1a 70%)",
+    band: "linear-gradient(98deg, transparent 0%, rgba(0,0,0,.76) 45%, rgba(255,0,110,.74) 51%, transparent 62%)",
+    rotation: -5,
+    offsetY: 9,
+  },
+  {
+    bg: "radial-gradient(ellipse at 45% 20%, #b5e48c 0%, #52b788 33%, #081c15 69%)",
+    band: "linear-gradient(100deg, transparent 5%, rgba(0,0,0,.7) 46%, rgba(82,183,136,.78) 52%, transparent 61%)",
+    rotation: -7,
+    offsetY: 15,
+  },
+  {
+    bg: "radial-gradient(circle at 58% 26%, #fee440 0%, #f77f00 35%, #1a0f00 73%)",
+    band: "linear-gradient(106deg, transparent 0%, rgba(0,0,0,.77) 47%, rgba(247,127,0,.75) 53%, transparent 64%)",
+    rotation: -3,
+    offsetY: 13,
+  },
+  {
+    bg: "radial-gradient(ellipse at 20% 22%, #a2d2ff 0%, #6c63ff 37%, #0c0820 76%)",
+    band: "linear-gradient(94deg, transparent 8%, rgba(0,0,0,.81) 44%, rgba(108,99,255,.72) 50%, transparent 60%)",
+    rotation: -6,
+    offsetY: 17,
+  },
+];
 
 function wrap(min: number, max: number, value: number) {
   const range = max - min;
@@ -312,7 +389,9 @@ function Plane({
   });
 
   const label = HOVER_LABELS[index % HOVER_LABELS.length];
-  const image = CARD_IMAGES[index % CARD_IMAGES.length];
+  const preset = GRADIENT_PRESETS[index % GRADIENT_PRESETS.length];
+  const bandRotation = preset.rotation ?? -4;
+  const bandOffsetY = preset.offsetY ?? 0;
 
   return (
     <motion.div
@@ -334,8 +413,20 @@ function Plane({
     >
       <span ref={labelRef} className={styles.planeLabel} />
       <div ref={faceRef} className={styles.planeInner}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.planeImage} src={image} alt="" draggable={false} />
+        <div className={styles.gradientCard}>
+          <div
+            className={styles.gradientBase}
+            style={{ background: preset.bg }}
+          />
+          <div
+            className={styles.gradientBand}
+            style={{
+              background: preset.band,
+              transform: `scale(1.18) rotate(${bandRotation}deg) translateY(${bandOffsetY}px)`,
+            }}
+          />
+          <div className={styles.grain} />
+        </div>
       </div>
       {isHovered ? (
         <div className={styles.hoverLabel}>
