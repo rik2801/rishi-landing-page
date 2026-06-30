@@ -10,7 +10,7 @@ import {
   useVelocity,
   type MotionValue,
 } from "motion/react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./page.module.css";
 
 const CARD_COUNT = 26;
@@ -61,17 +61,100 @@ function getCardScale(pos: number) {
   return lerp(SCALE_MID, SCALE_FRONT, t);
 }
 
+function distanceToRect(
+  x: number,
+  y: number,
+  rect: { left: number; top: number; right: number; bottom: number },
+) {
+  const dx = x < rect.left ? rect.left - x : x > rect.right ? x - rect.right : 0;
+  const dy = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0;
+  return Math.hypot(dx, dy);
+}
+
+function getHoverSlop(cardScale: number) {
+  return Math.max(52, 110 * (1 - cardScale * 0.45));
+}
+
 const HOVER_Z_LIFT = 40;
 const HOVER_SCALE_BOOST = 1.035;
 
 const HOVER_LABELS = [
+  "Afterglow",
   "Motion Blur",
+  "Ghost Index",
   "Signal Drift",
   "Soft Meridian",
-  "Ghost Index",
-  "Parallel Sun",
   "Frame Echo",
+  "Parallel Sun",
+  "Night Relay",
 ] as const;
+
+const GLITCH_CHARS =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789░▒▓█■□◆◇{}[]()+-~|/\\";
+
+function ScrambleLabel({
+  text,
+  active,
+  className,
+}: {
+  text: string;
+  active: boolean;
+  className?: string;
+}) {
+  const [display, setDisplay] = useState(text);
+
+  useEffect(() => {
+    if (!active) {
+      setDisplay(text);
+      return;
+    }
+
+    setDisplay(
+      text
+        .split("")
+        .map((char) =>
+          char === " "
+            ? " "
+            : GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)],
+        )
+        .join(""),
+    );
+
+    let frame = 0;
+    const totalFrames = 24;
+    const interval = window.setInterval(() => {
+      frame += 1;
+
+      const progress = frame / totalFrames;
+      const resolvedCount = Math.floor(progress * text.length);
+
+      const next = text
+        .split("")
+        .map((char, i) => {
+          if (char === " ") {
+            return " ";
+          }
+          if (i < resolvedCount) {
+            return char;
+          }
+
+          return GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+        })
+        .join("");
+
+      setDisplay(next);
+
+      if (frame >= totalFrames) {
+        setDisplay(text);
+        window.clearInterval(interval);
+      }
+    }, 17);
+
+    return () => window.clearInterval(interval);
+  }, [text, active]);
+
+  return <span className={className}>{display}</span>;
+}
 
 const CARD_IMAGES = [
   "/homepage.webp",
@@ -116,8 +199,7 @@ type PlaneProps = {
   offset: MotionValue<number>;
   waveIntensity: MotionValue<number>;
   hoveredIndex: number | null;
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
+  faceRef: (element: HTMLDivElement | null) => void;
 };
 
 function Plane({
@@ -125,8 +207,7 @@ function Plane({
   offset,
   waveIntensity,
   hoveredIndex,
-  onHoverStart,
-  onHoverEnd,
+  faceRef,
 }: PlaneProps) {
   const isHovered = hoveredIndex === index;
   const hoverZ = useMotionValue(0);
@@ -250,18 +331,20 @@ function Plane({
         opacity,
         zIndex,
       }}
-      onMouseEnter={onHoverStart}
-      onMouseLeave={onHoverEnd}
     >
       <span ref={labelRef} className={styles.planeLabel} />
-      <div className={styles.planeInner}>
+      <div ref={faceRef} className={styles.planeInner}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.planeImage} src={image} alt="" draggable={false} />
       </div>
       {isHovered ? (
         <div className={styles.hoverLabel}>
           <div className={styles.hoverLine} />
-          <span>{label}</span>
+          <ScrambleLabel
+            text={label.toUpperCase()}
+            active={isHovered}
+            className={styles.hoverLabelText}
+          />
         </div>
       ) : null}
     </motion.div>
@@ -270,6 +353,8 @@ function Plane({
 
 export default function ScrollVelocityPlanesPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const planeFaceRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const pointerRef = useRef({ x: 0, y: 0, inside: false });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const offset = useMotionValue(0);
   const velocity = useVelocity(offset);
@@ -282,6 +367,88 @@ export default function ScrollVelocityPlanesPage() {
     Math.min(Math.abs(value ?? 0) / 900, 1),
   );
 
+  const findHoveredCard = useCallback(
+    (clientX: number, clientY: number) => {
+      const scroll = offset.get();
+      const candidates: {
+        index: number;
+        distance: number;
+        z: number;
+        exact: boolean;
+        area: number;
+      }[] = [];
+
+      for (let index = 0; index < CARD_COUNT; index += 1) {
+        const pos = getConveyorPos(index, scroll);
+        if (Math.abs(pos) > 12) {
+          continue;
+        }
+
+        const face = planeFaceRefs.current[index];
+        if (!face) {
+          continue;
+        }
+
+        const rect = face.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+          continue;
+        }
+
+        const z = Math.round(4000 - pos * 55);
+        const distance = distanceToRect(clientX, clientY, rect);
+        const exact = distance === 0;
+        const area = rect.width * rect.height;
+
+        if (exact) {
+          candidates.push({ index, distance: 0, z, exact: true, area });
+          continue;
+        }
+
+        const slop = getHoverSlop(getCardScale(pos));
+        if (distance <= slop) {
+          candidates.push({ index, distance, z, exact: false, area });
+        }
+      }
+
+      if (candidates.length === 0) {
+        return null;
+      }
+
+      const exactHits = candidates.filter((candidate) => candidate.exact);
+      const pool = exactHits.length > 0 ? exactHits : candidates;
+
+      pool.sort((a, b) => {
+        if (a.exact !== b.exact) {
+          return a.exact ? -1 : 1;
+        }
+        if (a.distance !== b.distance) {
+          return a.distance - b.distance;
+        }
+        if (a.area !== b.area) {
+          return a.area - b.area;
+        }
+        return b.z - a.z;
+      });
+
+      return pool[0]?.index ?? null;
+    },
+    [offset],
+  );
+
+  const updateHoveredCard = useCallback(
+    (clientX: number, clientY: number) => {
+      const next = findHoveredCard(clientX, clientY);
+      setHoveredIndex((current) => (current === next ? current : next));
+    },
+    [findHoveredCard],
+  );
+
+  const setPlaneFaceRef = useCallback((index: number) => {
+    return (element: HTMLDivElement | null) => {
+      planeFaceRefs.current[index] = element;
+    };
+  }, []);
+
   const inertiaControl = useRef<ReturnType<typeof animate> | null>(null);
 
   useMotionValueEvent(offset, "change", () => {
@@ -289,7 +456,25 @@ export default function ScrollVelocityPlanesPage() {
       inertiaControl.current.stop();
       inertiaControl.current = null;
     }
+
+    if (pointerRef.current.inside) {
+      updateHoveredCard(pointerRef.current.x, pointerRef.current.y);
+    }
   });
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    pointerRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      inside: true,
+    };
+    updateHoveredCard(event.clientX, event.clientY);
+  };
+
+  const handlePointerLeave = () => {
+    pointerRef.current.inside = false;
+    setHoveredIndex(null);
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -339,7 +524,8 @@ export default function ScrollVelocityPlanesPage() {
         className={styles.viewport}
         onPan={handlePan}
         onPanEnd={handlePanEnd}
-        onMouseLeave={() => setHoveredIndex(null)}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
       >
         <div className={styles.stage}>
           {Array.from({ length: CARD_COUNT }, (_, index) => (
@@ -349,8 +535,7 @@ export default function ScrollVelocityPlanesPage() {
               offset={offset}
               waveIntensity={waveIntensity}
               hoveredIndex={hoveredIndex}
-              onHoverStart={() => setHoveredIndex(index)}
-              onHoverEnd={() => setHoveredIndex(null)}
+              faceRef={setPlaneFaceRef(index)}
             />
           ))}
         </div>
