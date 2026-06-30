@@ -3284,6 +3284,45 @@ body:has(.character-intro-page) {
 }
 
 .character-intro-page {
+  --case-studies-marker-gradient:
+    radial-gradient(circle at 20% 30%, #fc7e32 0%, transparent 42%),
+    radial-gradient(circle at 45% 45%, #fb5782 0%, transparent 45%),
+    radial-gradient(circle at 65% 60%, #e77ebd 0%, transparent 48%),
+    radial-gradient(circle at 85% 45%, #b34df3 0%, transparent 52%),
+    #fb5782;
+  --case-studies-accent-gradient: linear-gradient(
+    90deg,
+    #fc7e32 0%,
+    #fb5782 34%,
+    #e77ebd 68%,
+    #b34df3 100%
+  );
+  --character-glass-border: color-mix(in srgb, #ffffff 63%, var(--fg) 6%);
+  --character-glass-fill: linear-gradient(
+    165deg,
+    color-mix(in srgb, #ffffff 15%, transparent) 0%,
+    color-mix(in srgb, #ffffff 8%, transparent) 100%
+  );
+  --character-glass-specular: linear-gradient(
+    168deg,
+    color-mix(in srgb, #ffffff 21%, transparent) 0%,
+    color-mix(in srgb, #ffffff 6%, transparent) 28%,
+    transparent 52%
+  );
+  --character-glass-backdrop: blur(10px) saturate(112%) brightness(1.12);
+  --character-glass-inset:
+    0 0 0 0.5px color-mix(in srgb, #ffffff 33%, transparent) inset,
+    0 1px 0 color-mix(in srgb, #ffffff 42%, transparent) inset;
+  --character-glass-glow:
+    0 4px 20px -4px color-mix(in srgb, #fc7e32 18%, transparent),
+    0 10px 30px -8px color-mix(in srgb, #fb5782 14%, transparent),
+    0 16px 38px -10px color-mix(in srgb, #e77ebd 10%, transparent),
+    0 22px 46px -14px color-mix(in srgb, #b34df3 8%, transparent);
+  --character-glass-glow-sm:
+    0 2px 12px -2px color-mix(in srgb, #fc7e32 18%, transparent),
+    0 6px 18px -4px color-mix(in srgb, #fb5782 14%, transparent),
+    0 10px 24px -6px color-mix(in srgb, #e77ebd 10%, transparent),
+    0 14px 30px -8px color-mix(in srgb, #b34df3 8%, transparent);
   position: fixed;
   inset: 0;
   width: 100%;
@@ -3406,6 +3445,7 @@ body:has(.character-intro-page) {
 .character-intro-fade--out {
   opacity: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
 .character-intro-fade--exit {
@@ -3452,12 +3492,42 @@ body:has(.character-intro-page) {
   align-self: stretch;
   min-height: 0;
   padding: clamp(1rem, 3.5vw, 1.75rem) clamp(1rem, 4vw, 2rem);
-  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--fg) 10%, transparent);
+  border-radius: 20px;
+  border: 1px solid var(--character-glass-border);
+  background: var(--character-glass-fill);
+  -webkit-backdrop-filter: var(--character-glass-backdrop);
+  backdrop-filter: var(--character-glass-backdrop);
+  box-shadow: var(--character-glass-inset), var(--character-glass-glow);
   pointer-events: auto;
-  overflow: visible;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+@media (min-width: 769px) {
+  .character-dialogue-box {
+    position: fixed;
+    left: max(6vw, env(safe-area-inset-left, 0px));
+    top: 48%;
+    transform: translateY(-50%);
+    width: clamp(320px, 30vw, 460px);
+    align-self: auto;
+    z-index: 2;
+  }
+}
+
+.character-dialogue-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: var(--character-glass-specular);
+  pointer-events: none;
+}
+
+.character-dialogue-box > * {
+  position: relative;
+  z-index: 1;
 }
 
 .character-dialogue-skip {
@@ -3474,8 +3544,8 @@ body:has(.character-intro-page) {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--fg-muted);
-  opacity: 0.72;
+  color: var(--fg);
+  opacity: 0.62;
   cursor: pointer;
 }
 
@@ -3496,14 +3566,15 @@ body:has(.character-intro-page) {
   font-size: clamp(9px, 2.5vw, 11px);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--fg-muted);
+  color: var(--fg);
+  opacity: 0.62;
 }
 
 .character-dialogue-kicker-sub {
   text-transform: none;
   letter-spacing: 0.02em;
   font-weight: 400;
-  opacity: 0.85;
+  opacity: 0.78;
 }
 
 .character-dialogue-text {
@@ -3513,6 +3584,7 @@ body:has(.character-intro-page) {
   line-height: 1.35;
   font-weight: 500;
   color: var(--fg);
+  text-shadow: 0 1px 12px color-mix(in srgb, var(--bg) 55%, transparent);
   white-space: normal;
   overflow-wrap: break-word;
 }
@@ -3526,44 +3598,96 @@ body:has(.character-intro-page) {
   flex-shrink: 0;
 }
 
+@media (min-width: 769px) {
+  .character-intro-choices {
+    position: fixed;
+    right: max(6vw, env(safe-area-inset-right, 0px));
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(320px, 28vw, 460px);
+    z-index: 2;
+  }
+}
+
 .character-intro-choice-btn {
+  position: relative;
   appearance: none;
   margin: 0;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--character-glass-border);
   border-radius: 999px;
-  background: var(--bg);
+  background: var(--character-glass-fill);
+  -webkit-backdrop-filter: var(--character-glass-backdrop);
+  backdrop-filter: var(--character-glass-backdrop);
+  box-shadow: var(--character-glass-inset), var(--character-glass-glow-sm);
   color: var(--fg);
   font: inherit;
   font-size: clamp(15px, 2.2vw, 17px);
   line-height: 1.2;
   cursor: pointer;
+  overflow: hidden;
   transition:
-    background-color 0.25s ease,
+    background 0.25s ease,
     color 0.25s ease,
-    border-color 0.25s ease;
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    -webkit-backdrop-filter 0.25s ease,
+    backdrop-filter 0.25s ease;
 }
 
-.character-intro-choice-btn:hover {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
+.character-intro-choice-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--character-glass-specular);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.character-intro-choice-btn:hover,
+.character-intro-choice-btn--highlight:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 2px 14px color-mix(in srgb, #000000 10%, transparent);
+  animation: none;
+}
+
+.character-intro-choice-btn:hover::after,
+.character-intro-choice-btn--highlight:hover::after {
+  opacity: 0;
 }
 
 .character-intro-choice-btn--highlight {
-  border-color: color-mix(in srgb, var(--fg) 55%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent);
+  border-color: color-mix(in srgb, #ffffff 72%, var(--fg) 12%);
+  box-shadow:
+    var(--character-glass-inset),
+    0 0 0 1px color-mix(in srgb, #fb5782 22%, transparent),
+    var(--character-glass-glow-sm);
   animation: character-intro-duorin-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes character-intro-duorin-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
+    box-shadow:
+      var(--character-glass-inset),
+      0 0 0 1px color-mix(in srgb, #fb5782 18%, transparent),
+      var(--character-glass-glow-sm);
   }
 
   50% {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 8%, transparent);
+    box-shadow:
+      var(--character-glass-inset),
+      0 0 0 3px color-mix(in srgb, #fb5782 14%, transparent),
+      0 2px 16px -2px color-mix(in srgb, #fc7e32 24%, transparent),
+      0 6px 24px -4px color-mix(in srgb, #fb5782 20%, transparent),
+      0 10px 30px -6px color-mix(in srgb, #e77ebd 16%, transparent),
+      0 14px 36px -8px color-mix(in srgb, #b34df3 14%, transparent);
   }
 }
 
@@ -3575,6 +3699,18 @@ body:has(.character-intro-page) {
   width: min(100%, 34rem);
   pointer-events: auto;
   flex-shrink: 0;
+}
+
+@media (min-width: 769px) {
+  .character-intro-actions {
+    position: fixed;
+    right: max(6vw, env(safe-area-inset-right, 0px));
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(320px, 28vw, 460px);
+    z-index: 2;
+    align-items: stretch;
+  }
 }
 
 .character-intro-action-btn {
@@ -3607,6 +3743,37 @@ body:has(.character-intro-page) {
   background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
+}
+
+@media (max-width: 768px) {
+  .character-dialogue-box {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    align-self: stretch;
+    z-index: auto;
+  }
+
+  .character-intro-choices {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: min(100%, 34rem);
+    z-index: auto;
+  }
+
+  .character-intro-actions {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: min(100%, 34rem);
+    z-index: auto;
+    align-items: center;
+  }
 }
 
 @media (max-width: 560px) {
