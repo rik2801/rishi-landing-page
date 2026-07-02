@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AutoplayVideo } from "@/components/autoplay-video";
 import { CaseStudiesBreadcrumb } from "@/components/case-studies-breadcrumb";
-import { CaseStudyCard } from "@/components/case-study-card";
+import { CaseStudyCard, type CaseStudyCardAccent } from "@/components/case-study-card";
 
 export const metadata: Metadata = {
   title: "Case Studies — Rishi Kiran",
@@ -15,6 +15,7 @@ type CaseStudyListItem = {
   roleLabel: string;
   href: string;
   featured?: boolean;
+  accent: CaseStudyCardAccent;
 };
 
 const CASE_STUDIES: CaseStudyListItem[] = [
@@ -25,6 +26,9 @@ const CASE_STUDIES: CaseStudyListItem[] = [
     roleLabel: "AI Product · UX Engineering · Trust Systems",
     href: "/case-studies/duorin",
     featured: true,
+    accent: {
+      image: "/card-bg/silver-orange.webp",
+    },
   },
   {
     title: "Snack'nU",
@@ -32,6 +36,9 @@ const CASE_STUDIES: CaseStudyListItem[] = [
       "A campus food-redistribution service concept for surfacing catered surplus after events and routing time-sensitive pickups to nearby students.",
     roleLabel: "Service Design · Campus Operations",
     href: "/case-studies/snacknu",
+    accent: {
+      image: "/card-bg/yellow-black.webp",
+    },
   },
   {
     title: "They're Waiting",
@@ -39,6 +46,9 @@ const CASE_STUDIES: CaseStudyListItem[] = [
       "A behavioral productivity product using time-aware nudges, urgency design, and emotional accountability to reduce procrastination.",
     roleLabel: "Behavioral UX · Notification Strategy",
     href: "/case-studies/theyre-waiting",
+    accent: {
+      image: "/card-bg/cool-red-neony.webp",
+    },
   },
   {
     title: "Citizen-X",
@@ -46,6 +56,9 @@ const CASE_STUDIES: CaseStudyListItem[] = [
       "A civic product designed to help users compare political parties through manifesto-based questions instead of personality-driven bias.",
     roleLabel: "Civic UX · Information Architecture",
     href: "/case-studies/citizenx",
+    accent: {
+      image: "/card-bg/panther-stripes.webp",
+    },
   },
 ];
 
@@ -66,10 +79,6 @@ export default function CaseStudiesClassicPage() {
               Selected product design, UX, and technical product work across AI, behavior design,
               marketplaces, and civic systems.
             </p>
-            <p className="case-studies-positioning">
-              I design AI and systems-heavy products where UX depends on logic, data, and trust, not just
-              screens.
-            </p>
           </div>
           <div className="case-studies-hero-art" aria-hidden="true">
             <AutoplayVideo src="/rik.webm" className="case-studies-rik-image" />
@@ -77,7 +86,6 @@ export default function CaseStudiesClassicPage() {
         </div>
       </header>
       <div className="case-studies-work-block">
-        <p className="case-studies-section-label">Selected work</p>
         <div className="case-studies-grid">
           {CASE_STUDIES.map((c) => (
             <CaseStudyCard
@@ -87,6 +95,7 @@ export default function CaseStudiesClassicPage() {
               roleLabel={c.roleLabel}
               href={c.href}
               featured={c.featured}
+              accent={c.accent}
             />
           ))}
         </div>

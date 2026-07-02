@@ -53,7 +53,7 @@ export default function RootLayout({
       className={`${apercu.variable} ${apercuMono.variable}`}
       suppressHydrationWarning
     >
-      <head>
+      <body className="font-sans antialiased">
         <Script
           id="palette-script"
           strategy="beforeInteractive"
@@ -64,8 +64,6 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: cinematicEnterScript }}
         />
-      </head>
-      <body className="font-sans antialiased">
         <MediaGuard />
         <PortfolioTransition />
         {children}
